@@ -11,7 +11,6 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
-    <!-- ИЗМЕНЕНИЕ: Загружаем новый шрифт Uncial Antiqua -->
     <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
     
     <!-- 
@@ -87,13 +86,13 @@
             background-color: rgba(250, 245, 230, 0.95); border: 4px solid #4a2c2a;
             border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(74, 44, 42, 0.5) inset;
         }
-        /* ИЗМЕНЕНИЕ: Шрифт заголовка обновлен на Uncial Antiqua */
         h1.magic-title { 
             font-family: 'Uncial Antiqua', 'Cinzel Decorative', serif; 
             text-shadow: 1px 1px 2px rgba(199, 162, 101, 0.7); 
         }
 
         /* --- СТИЛИ ТАЙМЕРА --- */
+        /* ИЗМЕНЕНИЕ: Возвращено к оригиналу */
         #stickyTimer { position: fixed; top: 1rem; right: 1rem; z-index: 1000; width: 220px; transition: transform 0.3s ease; }
         .timer-display-compact { font-family: 'Cinzel Decorative', serif; font-size: 1.8rem; font-weight: 700; color: #4a2c2a; text-align: center; line-height: 1; cursor: pointer; }
         .btn-timer-small { font-size: 0.8rem; padding: 4px 8px; background-color: #4a2c2a; color: #fdf5e6; border: 1px solid #c7a265; border-radius: 4px; cursor: pointer; }
@@ -111,6 +110,14 @@
         .cat-love { background-color: var(--cat-love); } .cat-shop { background-color: var(--cat-shop); }
         .cat-docs { background-color: var(--cat-docs); }
         .task-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; font-weight: bold; margin-right: 0.5rem; display: inline-block; vertical-align: middle; }
+        
+        /* Стили для тега исполнителя (ОСТАВЛЕНО) */
+        .assignee-tag {
+            font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;
+            color: #4a2c2a; background-color: #fef08a; border: 1px solid #c7a265;
+            font-weight: bold; margin-left: 0.5rem; display: inline-block;
+            vertical-align: middle;
+        }
 
         /* --- КАЛЕНДАРЬ --- */
         #calendarViewContainer { display: none; min-height: 500px; }
@@ -141,6 +148,8 @@
         }
         .btn-magic { font-family: 'Merriweather', serif; font-weight: 700; background-color: #4a2c2a; color: #fdf5e6; border: 2px solid #c7a265; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: all 0.2s ease; cursor: pointer; }
         .btn-magic:hover { background-color: #6d413c; color: #fff; transform: translateY(-2px); }
+        .btn-magic:disabled { background-color: #9ca3af; color: #e5e7eb; cursor: not-allowed; border-color: #6b7280; }
+        
         .magic-input {
             width: 100%; padding: 0.75rem; border-radius: 6px; border: 2px solid #c7a265;
             background-color: #fff; color: #4a2c2a;
@@ -151,6 +160,9 @@
             outline: none; border-color: #4a2c2a; background-color: #fff;
             box-shadow: 0 0 10px rgba(199, 162, 101, 0.5);
         }
+        .magic-label {
+            display: block; text-sm font-bold text-yellow-900 mb-2;
+        }
 
         /* --- СТИЛИ ЗАДАЧ --- */
         .task-item { animation: fadeIn 0.4s ease-out; border-left-width: 8px; transition: all 0.3s ease; }
@@ -159,10 +171,36 @@
         .task-item.priority-high { border-left-color: #e53e3e; }
         .task-item.priority-medium { border-left-color: #f6e05e; }
         .task-item.priority-low { border-left-color: #a0aec0; }
+        
+        /* ИЗМЕНЕНИЕ: Стиль кнопок возвращен к оригиналу */
+        /* ИЗМЕНЕНИЕ: Делаем кнопки "красивыми" (круглыми) */
         .task-spell-btn {
-            font-size: 0.9rem; padding: 3px 8px; border-radius: 4px; transition: all 0.2s;
+            font-size: 1rem; /* 16px */
+            width: 2rem;     /* 32px */
+            height: 2rem;    /* 32px */
+            padding: 0;
+            border-radius: 9999px; /* Circle */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.2s;
             font-family: monospace; font-weight: bold; border: 1px solid;
+            /* ИЗМЕНЕНИЕ: Устанавливаем цвет для иконки (SVG) */
+            color: white;
         }
+        /* ИЗМЕНЕНИЕ: Добавляем стили для SVG внутри кнопки */
+        .task-spell-btn svg {
+            width: 1em; /* 16px, соответствует font-size */
+            height: 1em; /* 16px */
+            /* fill: currentColor; - убрано, т.к. fill="currentColor" в SVG */
+        }
+        .task-spell-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- ПЕРЕКЛЮЧАТЕЛЬ ВИДОВ (Фильтры) --- */
@@ -302,7 +340,7 @@
 <body class="p-4">
 
     <!-- 
-      НОВЫЙ БЛОК: ЭКРАН АУТЕНТИФИКАЦИИ
+      ЭКРАН АУТЕНТИФИКАЦИИ
       (без изменений)
     -->
     <div id="authOverlay">
@@ -336,18 +374,20 @@
 
 
     <!-- 
-      НОВЫЙ КОНТЕЙНЕР ДЛЯ СТИКЕРОВ
+      КОНТЕЙНЕР ДЛЯ СТИКЕРОВ
       (без изменений)
     -->
     <div id="stickerBackdrop"></div>
     
     <!-- 
       ОСНОВНОЕ ПРИЛОЖЕНИЕ
-      (без изменений)
     -->
     <div id="mainAppContainer" class="max-w-4xl mx-auto mt-8 md:mt-0 px-4 relative z-40" style="display: none;">
 
-        <!-- Таймер (без изменений) -->
+        <!-- 
+            Таймер "Зелье Фокуса"
+            ИЗМЕНЕНИЕ: HTML возвращен к оригиналу
+        -->
         <div id="stickyTimer" class="magic-parchment p-3 shadow-xl">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-xs font-bold text-yellow-900 uppercase tracking-widest">Зелье Фокуса</span>
@@ -358,6 +398,7 @@
             </div>
             <div id="timerDisplayContainer" class="relative">
                 <div id="timerDisplay" class="timer-display-compact">25:00</div>
+                <!-- Оригинальный input для настройки времени -->
                 <input type="number" id="timerInput" class="magic-input absolute inset-0 w-full text-center text-2xl hidden" value="25" min="1" max="180">
             </div>
             <div id="timerStatus" class="text-center text-xs text-gray-600 h-4 truncate mb-2">Котелок остыл</div>
@@ -370,7 +411,6 @@
         <header class="text-center mb-6 relative pt-4">
             <h1 class="magic-title text-4xl md:text-5xl font-bold text-yellow-100">Ежедневный Пророк</h1>
             
-            <!-- ИЗМЕНЕНИЕ: Добавлена кнопка "Шляпа" (hatSortBtn) -->
             <div id="userControls" class="absolute top-0 right-0 p-2 flex gap-2">
                  <button id="hatSortBtn" class="btn-header-icon" title="Случайная задача">🎩</button>
                  <button id="openSettingsBtn" class="btn-header-icon" title="Настройки">⚙️</button>
@@ -378,7 +418,10 @@
             </div>
         </header>
 
-        <!-- НОВАЯ ГЛАВНАЯ НАВИГАЦИЯ (без изменений) -->
+        <!-- 
+            ГЛАВНАЯ НАВИГАЦИЯ 
+            (без изменений)
+        -->
         <nav class="magic-nav">
             <button id="nav-tasks" class="nav-btn active">📜 Задачи</button>
             <button id="nav-calendar" class="nav-btn">📅 Календарь</button>
@@ -386,8 +429,7 @@
         </nav>
 
         <!-- 
-          НОВЫЙ РЕДИЗАЙН: Контейнеры-Вьюшки
-          (без изменений)
+          Контейнеры-Вьюшки
         -->
 
         <!-- ВЬЮШКА: Задачи (без изменений) -->
@@ -400,7 +442,7 @@
             
             <main class="magic-parchment p-4 md:p-6">
                  <div id="presenceContainer" class="mb-4 p-3 bg-yellow-50 bg-opacity-50 rounded-lg border border-yellow-800 border-opacity-30">
-                    <h3 class="text-sm font-bold text-yellow-900 mb-2 text-center uppercase tracking-wider">Палата Связей</h3>
+                    <!-- <h3 class="text-sm font-bold text-yellow-900 mb-2 text-center uppercase tracking-wider">Палата Связей</h3> УДАЛЕНО -->
                     <div class="flex flex-wrap justify-around items-center gap-4">
                         <div id="currentUserStatus" class="text-center">
                             <span id="currentUserDisplay" class="font-bold text-gray-800 text-sm truncate">...</span>
@@ -409,27 +451,30 @@
                             </div>
                         </div>
                         <div id="otherUserStatus" class="text-center">
-                            <span class="font-bold text-gray-800">Партнёр:</span>
+                            <!-- <span class="font-bold text-gray-800">Партнёр:</span> УДАЛЕНО -->
+                            <span id="otherUserName" class="font-bold text-gray-800 text-sm truncate">Оффлайн</span> <!-- ИЗМЕНЕНО: Классы и структура -->
                             <div class="flex items-center justify-center gap-2 mt-1">
                                 <div id="otherUserIndicator" class="presence-indicator presence-offline"></div>
-                                <span id="otherUserName" class="text-sm font-bold text-gray-600">Оффлайн</span>
+                                <!-- <span id="otherUserName" class="text-sm font-bold text-gray-600">Оффлайн</span> УДАЛЕНО ИЗ ЭТОГО МЕСТА -->
                             </div>
                         </div>
                     </div>
-                </div>
+                 </div>
                  
+                 <!-- ИСПРАВЛЕНИЕ: Восстанавливаем недостающие элементы -->
                  <div class="view-toggle">
                     <button id="filterActive" class="view-btn active">Активные</button>
                     <button id="filterHigh" class="view-btn">Срочные</button>
                     <button id="filterCompleted" class="view-btn">Архив</button>
                  </div>
 
-                 <!-- ИЗМЕНЕНИЕ: Удален блок с кнопкой "Шляпа" отсюда -->
                  <div id="taskListContainer" class="mt-4">
                     <div id="taskList" class="space-y-3 min-h-[100px]">
                         <p class="text-center text-gray-500 italic">Загрузка заклинаний...</p>
                     </div>
                  </div>
+                 <!-- КОНЕЦ ИСПРАВЛЕНИЯ -->
+                 
             </main>
         </div>
 
@@ -443,7 +488,10 @@
     </div> <!-- Конец #mainAppContainer -->
 
 
-    <!-- Модальное окно добавления задачи (без изменений) -->
+    <!-- 
+        Модальное окно добавления задачи
+        (ОСТАВЛЕНО с полем 'Исполнитель')
+    -->
     <div id="addTaskModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative">
             <button id="closeTaskModalBtn" class="absolute top-2 right-2 text-2xl text-yellow-900 hover:text-yellow-600">&times;</button>
@@ -454,7 +502,7 @@
                 <textarea id="taskDescriptionInput" class="magic-input w-full" rows="3" placeholder="Дополнительные детали... (необязательно)"></textarea>
 
                 <div>
-                    <label class="block text-sm font-bold text-yellow-900 mb-2">Магическая метка:</label>
+                    <label class="magic-label">Магическая метка:</label>
                     <div class="flex flex-wrap gap-2">
                         <label class="category-pill cat-students"><input type="radio" name="taskCat" value="students" checked> Студенты</label>
                         <label class="category-pill cat-home"><input type="radio" name="taskCat" value="home"> Дом</label>
@@ -465,17 +513,28 @@
                         <label class="category-pill cat-docs"><input type="radio" name="taskCat" value="docs"> Документы</label>
                     </div>
                 </div>
+                
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <input id="taskDueDate" class="magic-input" placeholder="Срок исполнения...">
+                    
                     <select id="taskPriority" class="magic-input">
                         <option value="low">Обычный приоритет</option>
                         <option value="medium" selected>Важный (Expelliarmus)</option>
                         <option value="high">Срочный! (Непреложный)</option>
                     </select>
                 </div>
+
+                <div>
+                    <label for="taskAssignee" class="magic-label">Исполнитель:</label>
+                    <select id="taskAssignee" class="magic-input">
+                        <option value="everyone">Для всех</option>
+                        <option value="me">Только для меня</option>
+                        <option value="partner" disabled>Только для партнера</option>
+                    </select>
+                </div>
                 
                 <div>
-                    <label class="block text-sm font-bold text-yellow-900 mb-2">Подзадачи (список покупок):</label>
+                    <label class="magic-label">Подзадачи:</label> <!-- ИЗМЕНЕНО: убрано (список покупок) -->
                     <div id="newTaskSubtaskList" class="space-y-2 p-3 bg-white bg-opacity-60 rounded-lg max-h-40 overflow-y-auto">
                         <p class="text-center text-sm text-gray-600 italic">Список пуст...</p>
                     </div>
@@ -484,6 +543,23 @@
                         <button id="newTaskAddSubtaskBtn" class="btn-magic px-4 rounded-lg">+</button>
                     </div>
                 </div>
+
+                <!-- ИСПРАВЛЕНИЕ: Удаляем дублирующийся и сломанный блок HTML -->
+                <!-- 
+                <div>
+                    <label for="taskAssignee" class="magic-label">Исполнитель:</label>
+                    <select id="taskAssignee" class="magic-input">
+                    <label class="magic-label">Подзадачи (список покупок):</label>
+                    <div id="newTaskSubtaskList" class="space-y-2 p-3 bg-white bg-opacity-60 rounded-lg max-h-40 overflow-y-auto">
+                        <p class="text-center text-sm text-gray-600 italic">Список пуст...</p>
+                    </div>
+                    <div id="newTaskAddSubtaskContainer" class="flex gap-2 mt-2">
+                        <input type="text" id="newTaskNewSubtask" class="magic-input flex-grow" placeholder="Новый пункт...">
+                        <button id="newTaskAddSubtaskBtn" class="btn-magic px-4 rounded-lg">+</button>
+                    </div>
+                </div>
+                -->
+                <!-- КОНЕЦ ИСПРАВЛЕНИЯ -->
 
                 <button id="addTaskBtn" class="btn-magic w-full py-3 text-lg rounded-lg mt-2">⚡ Произнести! ⚡</button>
             </div>
@@ -520,7 +596,7 @@
             <h3 class="text-2xl font-bold text-yellow-900 text-center magic-title mb-4">Настройки Волшебника</h3>
             <div class="space-y-4">
                 <div>
-                    <label for="nicknameInput" class="block text-sm font-bold text-yellow-900 mb-2">Ваш Никнейм:</label>
+                    <label for="nicknameInput" class="magic-label">Ваш Никнейм:</label>
                     <input type="text" id="nicknameInput" class="magic-input w-full text-lg">
                 </div>
                 <button id="saveNicknameBtn" class="btn-magic w-full py-3 text-lg rounded-lg mt-2">✨ Сохранить ✨</button>
@@ -533,24 +609,107 @@
         </div>
     </div>
 
-    <!-- Модальное окно Деталей Задачи -->
+    <!-- 
+        Модальное окно Настроек Таймера
+        ИЗМЕНЕНИЕ: Удалено
+    -->
+
+    <!-- 
+        Модальное окно Деталей Задачи
+        (ОСТАВЛЕНО с полным редактором)
+    -->
     <div id="taskDetailModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative">
-            <!-- ИЗМЕНЕНИЕ: Кнопки "Редактировать" и "Закрыть" обновлены -->
+            
             <button id="taskDetailEditBtn" class="btn-header-icon absolute top-2 right-14" title="Редактировать">✏️</button>
             <button id="closeTaskDetailModalBtn" class="btn-header-icon absolute top-2 right-2" title="Закрыть">&times;</button>
             
             <h3 id="taskDetailTitle" class="text-2xl font-bold text-yellow-900 text-center magic-title mb-4">Детали Заклинания</h3>
             
             <div class="space-y-4">
-                <div>
-                    <label for="taskDetailDescription" class="block text-sm font-bold text-yellow-900 mb-2">Описание:</label>
-                    <p id="taskDetailDescriptionText" class="text-gray-800 p-3 bg-white bg-opacity-60 rounded-lg min-h-[50px] whitespace-pre-wrap"></p>
-                    <textarea id="taskDetailDescriptionEdit" class="magic-input w-full hidden" rows="4" placeholder="Добавьте описание..."></textarea>
-                </div>
                 
+                <!-- ИСПРАВЛЕНИЕ: Удаляем этот лишний, сломанный блок. Нужный блок находится ниже. -->
+                <!--
                 <div>
-                    <label class="block text-sm font-bold text-yellow-900 mb-2">Подзадачи (список покупок):</label>
+                    <label class="magic-label">Подзадачи:</label> 
+                    <div id="newTaskSubtaskList" class="space-y-2 p-3 bg-white bg-opacity-60 rounded-lg max-h-40 overflow-y-auto">
+                        <p class="text-center text-sm text-gray-600 italic">Список пуст...</p>
+                        <div><strong class="text-yellow-900">Приоритет:</strong> <span id="taskDetailPriority" class="font-bold">...</span></div>
+                        <div><strong class="text-yellow-900">Срок:</strong> <span id="taskDetailDate" class="font-bold">...</span></div>
+                        <div><strong class="text-yellow-900">Исполнитель:</strong> <span id="taskDetailAssignee" class="font-bold">...</span></div>
+                    </div>
+                </div>
+                -->
+                <!-- КОНЕЦ ИСПРАВЛЕНИЯ -->
+
+                <!-- Блок Отображения (Вид) -->
+                <div id="taskDetailViewBlock">
+                    <div id="taskDetailStaticMeta" class="mb-4 p-3 bg-white bg-opacity-60 rounded-lg flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                        <div><strong class="text-yellow-900">Метка:</strong> <span id="taskDetailCategory" class="task-tag">...</span></div>
+                        <div><strong class="text-yellow-900">Приоритет:</strong> <span id="taskDetailPriority" class="font-bold">...</span></div>
+                        <div><strong class="text-yellow-900">Срок:</strong> <span id="taskDetailDate" class="font-bold">...</span></div>
+                        <div><strong class="text-yellow-900">Исполнитель:</strong> <span id="taskDetailAssignee" class="font-bold">...</span></div>
+                    </div>
+
+                    <div>
+                        <label class="magic-label">Описание:</label>
+                        <p id="taskDetailDescriptionText" class="text-gray-800 p-3 bg-white bg-opacity-60 rounded-lg min-h-[50px] whitespace-pre-wrap">...</p>
+                    </div>
+                </div>
+
+                <!-- Блок Редактирования (Скрыт) -->
+                <div id="taskDetailEditBlock" class="hidden space-y-4">
+                    <div>
+                        <label for="taskDetailTitleEdit" class="magic-label">Название заклинания:</label>
+                        <input type="text" id="taskDetailTitleEdit" class="magic-input w-full text-lg">
+                    </div>
+                    
+                    <div>
+                        <label for="taskDetailDescriptionEdit" class="magic-label">Описание:</label>
+                        <textarea id="taskDetailDescriptionEdit" class="magic-input w-full" rows="3" placeholder="Добавьте описание..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="magic-label">Магическая метка:</label>
+                        <div id="taskDetailCategoryEdit" class="flex flex-wrap gap-2">
+                            <label class="category-pill cat-students"><input type="radio" name="taskCatDetail" value="students"> Студенты</label>
+                            <label class="category-pill cat-home"><input type="radio" name="taskCatDetail" value="home"> Дом</label>
+                            <label class="category-pill cat-projects"><input type="radio" name="taskCatDetail" value="projects"> Проекты</label>
+                            <label class="category-pill cat-hobbies"><input type="radio" name="taskCatDetail" value="hobbies"> Хобби</label>
+                            <label class="category-pill cat-love"><input type="radio" name="taskCatDetail" value="love"> Любовь</label>
+                            <label class="category-pill cat-shop"><input type="radio" name="taskCatDetail" value="shop"> Магазин</label>
+                            <label class="category-pill cat-docs"><input type="radio" name="taskCatDetail" value="docs"> Документы</label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="taskDetailDateEdit" class="magic-label">Срок исполнения:</label>
+                            <input id="taskDetailDateEdit" class="magic-input" placeholder="Срок исполнения...">
+                        </div>
+                        <div>
+                            <label for="taskDetailPriorityEdit" class="magic-label">Приоритет:</label>
+                            <select id="taskDetailPriorityEdit" class="magic-input">
+                                <option value="low">Обычный</option>
+                                <option value="medium">Важный</option>
+                                <option value="high">Срочный!</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="taskDetailAssigneeEdit" class="magic-label">Исполнитель:</label>
+                        <select id="taskDetailAssigneeEdit" class="magic-input">
+                            <option value="everyone">Для всех</option>
+                            <option value="me">Только для меня</option>
+                            <option value="partner" disabled>Только для партнера</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Общий блок Подзадач -->
+                <div>
+                    <label class="magic-label">Подзадачи:</label> <!-- ИЗМЕНЕНО: убрано (список покупок) -->
                     
                     <div id="subtaskSelectAllContainer" class="hidden justify-end items-center gap-2 pr-2 mb-2">
                         <label for="toggleAllSubtasksCheckbox" class="text-sm font-bold text-yellow-900 cursor-pointer">Выбрать все</label>
@@ -593,12 +752,13 @@
             } = window.firebaseServices;
 
             // --- ГЛОБАЛЬНОЕ СОСТОЯНИЕ ---
-            // (без изменений)
+            // (Сброс otherUserInfo, selectedNoise, isNoisePlaying)
             let allTasks = []; 
             let allStickers = []; 
             let calendar; 
             let currentUserId = null;
             let currentUserNickname = null; 
+            let otherUserInfo = { uid: null, nickname: 'Оффлайн' };
             let currentFilter = 'active'; 
             let tasksUnsubscribe = null; 
             let stickersUnsubscribe = null; 
@@ -607,9 +767,10 @@
             let currentEditingTaskId = null; 
             let isTaskDetailEditing = false; 
             let currentViewingDate = null; 
+            let detailDatePicker; 
 
             // --- DOM ЭЛЕМЕНТЫ ---
-            // (без изменений)
+            // (Удалены ссылки на timerSettingsModal и его содержимое)
             const authOverlay = document.getElementById('authOverlay');
             const mainAppContainer = document.getElementById('mainAppContainer');
             const loginForm = document.getElementById('loginForm');
@@ -636,9 +797,24 @@
             const fullCurrentUserIdSettings = document.getElementById('fullCurrentUserIdSettings'); 
             const taskDetailModal = document.getElementById('taskDetailModal');
             const closeTaskDetailModalBtn = document.getElementById('closeTaskDetailModalBtn');
+            
             const taskDetailTitle = document.getElementById('taskDetailTitle');
+            const taskDetailViewBlock = document.getElementById('taskDetailViewBlock');
+            const taskDetailEditBlock = document.getElementById('taskDetailEditBlock');
+            const taskDetailStaticMeta = document.getElementById('taskDetailStaticMeta');
+            const taskDetailCategory = document.getElementById('taskDetailCategory');
+            const taskDetailPriority = document.getElementById('taskDetailPriority');
+            const taskDetailDate = document.getElementById('taskDetailDate');
+            const taskDetailAssignee = document.getElementById('taskDetailAssignee');
             const taskDetailDescriptionText = document.getElementById('taskDetailDescriptionText'); 
+            
+            const taskDetailTitleEdit = document.getElementById('taskDetailTitleEdit');
             const taskDetailDescriptionEdit = document.getElementById('taskDetailDescriptionEdit'); 
+            const taskDetailCategoryEdit = document.getElementById('taskDetailCategoryEdit');
+            const taskDetailDateEdit = document.getElementById('taskDetailDateEdit');
+            const taskDetailPriorityEdit = document.getElementById('taskDetailPriorityEdit');
+            const taskDetailAssigneeEdit = document.getElementById('taskDetailAssigneeEdit');
+            
             const taskDetailSubtaskList = document.getElementById('taskDetailSubtaskList');
             const taskDetailNewSubtask = document.getElementById('taskDetailNewSubtask');
             const taskDetailAddSubtaskContainer = document.getElementById('taskDetailAddSubtaskContainer'); 
@@ -646,28 +822,40 @@
             const taskDetailSaveBtn = document.getElementById('taskDetailSaveBtn');
             const taskDetailEditBtn = document.getElementById('taskDetailEditBtn'); 
             const toggleAllSubtasksCheckbox = document.getElementById('toggleAllSubtasksCheckbox'); 
+            
             const newTaskSubtaskList = document.getElementById('newTaskSubtaskList');
             const newTaskNewSubtask = document.getElementById('newTaskNewSubtask');
             const newTaskAddSubtaskBtn = document.getElementById('newTaskAddSubtaskBtn');
+            const taskAssigneeSelect = document.getElementById('taskAssignee');
+            
             const stickerBackdrop = document.getElementById('stickerBackdrop');
             const stickerModal = document.getElementById('stickerModal');
             const openStickerModalBtn = document.getElementById('openStickerModalBtn');
             const closeStickerModalBtn = document.getElementById('closeStickerModalBtn');
             const newStickerText = document.getElementById('newStickerText');
             const addStickerBtn = document.getElementById('addStickerBtn');
+            
             const navButtons = document.querySelectorAll('.nav-btn');
             const views = document.querySelectorAll('.view-container');
             const calendarViewEl = document.getElementById('calendarView'); 
             const filterActiveBtn = document.getElementById('filterActive');
             const filterHighBtn = document.getElementById('filterHigh');
             const filterCompletedBtn = document.getElementById('filterCompleted');
-            const hatSortBtn = document.getElementById('hatSortBtn'); // <-- Кнопка "Шляпа" все еще здесь
+            const hatSortBtn = document.getElementById('hatSortBtn');
+            
             let isStickerDragging = false;
             let currentDraggingSticker = null;
             let stickerOffsetX = 0;
             let stickerOffsetY = 0;
 
-            // --- АУДИО (без изменений) ---
+            /* ИЗМЕНЕНИЕ: Определяем "красивые" SVG иконки глобально */
+            const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M17.4,10.4L5.8,17.6C5.5,17.8,5.1,17.7,4.9,17.4C4.8,17.2,4.8,16.9,4.9,16.7L8,10L4.9,3.3C4.8,3.1,4.8,2.8,4.9,2.6C5.2,2.3,5.5,2.2,5.8,2.4L17.4,9.6C17.7,9.8,17.8,10.2,17.6,10.4C17.6,10.4,17.5,10.4,17.4,10.4z"/></svg>`;
+            const iconCheck = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M18.5,3.1l-9.8,9.8L4.3,8.4C4,8.1,3.5,8.1,3.2,8.4c-0.3,0.3-0.3,0.8,0,1.1l5.1,5.1c0.1,0.1,0.3,0.2,0.5,0.2s0.4-0.1,0.5-0.2l10.6-10.6c0.3-0.3,0.3-0.8,0-1.1C19.3,2.8,18.8,2.8,18.5,3.1z"/></svg>`;
+            const iconUndo = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M16.5,10.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S16.8,10.5,16.5,10.5z M11.5,12.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S11.8,12.5,11.5,12.5z M10,18.5C5.3,18.5,1.5,14.7,1.5,10S5.3,1.5,10,1.5c2.4,0,4.6,1,6.2,2.6l-1.4,1.4c-0.2,0.2-0.2,0.5,0,0.7s0.5,0.2,0.7,0l3.2-3.2c0.2-0.2,0.2-0.5,0-0.7L15.4,0.7c-0.2-0.2-0.5-0.2-0.7,0s-0.2,0.5,0,0.7l1.5,1.5C14.6,1.4,12.4,0.5,10,0.5C4.8,0.5,0.5,4.8,0.5,10s4.3,9.5,9.5,9.5s9.5-4.3,9.5-9.5c0-0.3-0.2-0.5-0.5-0.5s-0.5,0.2-0.5,0.5C18.5,14.7,14.7,18.5,10,18.5z"/></svg>`;
+            const iconDelete = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.7,10l4.6-4.6c0.2-0.2,0.2-0.5,0-0.7s-0.5-0.2-0.7,0L10,9.3L5.4,4.7c-0.2-0.2-0.5-0.2-0.7,0s-0.2,0.5,0,0.7L9.3,10l-4.6,4.6c-0.2,0.2-0.2,0.5,0,0.7C4.8,15.4,4.9,15.5,5,15.5s0.2,0,0.4-0.1L10,10.7l4.6,4.6c0.1,0.1,0.2,0.1,0.4,0.1s0.3-0.1,0.4-0.2c0.2-0.2,0.2-0.5,0-0.7L10.7,10z"/></svg>`;
+
+            // --- АУДИО ---
+            // ИЗМЕНЕНИЕ: Возвращено к оригиналу (только brownNoise)
             let audioInit = false;
             let brownNoise = null;
             const initAudio = async () => {
@@ -688,7 +876,8 @@
                 }
             };
 
-            // --- ЦВЕТА И ИМЕНА КАТЕГОРИЙ (без изменений) ---
+            // --- ЦВЕТА И ИМЕНА КАТЕГОРИЙ ---
+            // (без изменений)
             const catColors = {
                 students: '#3b82f6', home: '#d97706', projects: '#9333ea',
                 hobbies: '#10b981', love: '#ec4899', shop: '#eab308', docs: '#64748b'
@@ -698,7 +887,8 @@
                 hobbies: 'Хобби', love: 'Любовь', shop: 'Магазин', docs: 'Документы'
             };
             
-            // --- ЛОГИКА АУТЕНТИФИКАЦИИ (без изменений) ---
+            // --- ЛОГИКА АУТЕНТИФИКАЦИИ ---
+            // (без изменений)
             
             authTabLogin.addEventListener('click', () => {
                 authTabLogin.classList.add('active');
@@ -781,7 +971,7 @@
             
             
             // --- КАЛЕНДАРЬ (INIT) ---
-            // (без изменений с прошлого раза)
+            // (без изменений)
             const initCalendar = () => {
                 const calendarEl = document.getElementById('calendar');
                 if (calendar) {
@@ -955,6 +1145,8 @@
                     document.getElementById('otherUserName').textContent = "Оффлайн";
                     document.getElementById('otherUserIndicator').classList.remove('presence-online');
                     document.getElementById('otherUserIndicator').classList.add('presence-offline');
+                    otherUserInfo = { uid: null, nickname: 'Оффлайн' }; // Сброс
+                    
                     currentUserDisplayEl.textContent = "..."; 
                     currentUserIndicatorEl.classList.remove('presence-online'); 
                     currentUserIndicatorEl.classList.add('presence-offline'); 
@@ -1003,9 +1195,13 @@
                                 if (otherUser.online) {
                                     indicator.classList.remove('presence-offline');
                                     indicator.classList.add('presence-online');
+                                    // Сохраняем инфо о партнере
+                                    otherUserInfo = { uid: uid, nickname: otherUser.name };
                                 } else {
                                     indicator.classList.remove('presence-online');
                                     indicator.classList.add('presence-offline');
+                                    // Сохраняем, но с оффлайн статусом
+                                    otherUserInfo = { uid: uid, nickname: otherUser.name };
                                 }
                                 otherUserFound = true;
                                 break; 
@@ -1016,8 +1212,28 @@
                         document.getElementById('otherUserName').textContent = "Оффлайн";
                         document.getElementById('otherUserIndicator').classList.remove('presence-online');
                         document.getElementById('otherUserIndicator').classList.add('presence-offline');
+                        // Сбрасываем партнера
+                        otherUserInfo = { uid: null, nickname: 'Оффлайн' };
                     }
+                    // Обновляем селекторы в модалках
+                    updateAssigneeSelectors();
                 });
+            }
+            
+            // (без изменений)
+            function updateAssigneeSelectors() {
+                const partnerExists = otherUserInfo.uid !== null;
+                const partnerName = partnerExists ? otherUserInfo.nickname : 'Партнер (Оффлайн)';
+
+                // Модалка создания
+                const createPartnerOption = taskAssigneeSelect.querySelector('option[value="partner"]');
+                createPartnerOption.textContent = `Только для ${partnerName}`;
+                createPartnerOption.disabled = !partnerExists;
+
+                // Модалка редактирования
+                const editPartnerOption = taskDetailAssigneeEdit.querySelector('option[value="partner"]');
+                editPartnerOption.textContent = `Только для ${partnerName}`;
+                editPartnerOption.disabled = !partnerExists;
             }
 
             
@@ -1055,7 +1271,6 @@
 
             // --- ЛОГИКА ЗАДАЧ (FIRESTORE) ---
             // (без изменений)
-
             function listenForTasks() {
                 if (!currentUserId) return;
                 if (tasksUnsubscribe) tasksUnsubscribe(); 
@@ -1098,11 +1313,14 @@
                         console.log("OnSnapshot: Refreshing open task detail modal...");
                         const updatedTask = allTasks.find(t => t.id === currentEditingTaskId);
                         if (updatedTask) {
+                            // Обновляем только если не в режиме редактирования
+                            if (!isTaskDetailEditing) {
+                                populateTaskDetailView(updatedTask);
+                            }
+                            // Обновляем подзадачи в любом случае
                             renderSubtasks(updatedTask.subtasks || [], isTaskDetailEditing);
-                            taskDetailDescriptionText.textContent = updatedTask.description || '...';
-                            taskDetailDescriptionEdit.value = updatedTask.description || '';
-                            taskDetailTitle.textContent = updatedTask.text;
                         } else {
+                            // Задача была удалена, закрываем модалку
                             taskDetailModal.style.display = 'none';
                             currentEditingTaskId = null;
                         }
@@ -1114,22 +1332,25 @@
             }
 
             // --- РЕНДЕРИНГ ЗАДАЧ (СПИСОК) ---
-            // ИЗМЕНЕНИЕ: Удалена логика показа/скрытия hatSortBtn
+            // (без изменений)
             const renderTasks = () => {
+                // ИСПРАВЛЕНИЕ: Добавляем проверку, что taskListEl не null
+                if (!taskListEl) {
+                    console.error("taskListEl не найден! HTML структура может быть нарушена.");
+                    return;
+                }
+                
                 taskListEl.innerHTML = '';
                 
                 let tasksToRender = [];
                 
                 if (currentFilter === 'completed') {
                     tasksToRender = allTasks.filter(t => t.status === 'completed');
-                    // hatSortBtn.style.display = 'none'; // <-- УДАЛЕНО
                 } else if (currentFilter === 'high') {
                     tasksToRender = allTasks.filter(t => (t.status === 'pending' || t.status === 'inProgress') && t.priority === 'high');
-                    // hatSortBtn.style.display = 'inline-block'; // <-- УДАЛЕНО
                 } else {
                     // По умолчанию 'active'
                     tasksToRender = allTasks.filter(t => t.status === 'pending' || t.status === 'inProgress');
-                    // hatSortBtn.style.display = 'inline-block'; // <-- УДАЛЕНО
                 }
 
                 if (tasksToRender.length === 0) {
@@ -1154,27 +1375,41 @@
 
                 if (task.status === 'pending') {
                     buttons = `
-                        <button class="task-spell-btn bg-blue-600 text-white border-blue-700 hover:bg-blue-700" onclick="window.startTask('${task.id}')" title="Начать выполнение">▶</button>
+                        <button class="task-spell-btn bg-blue-600 text-white border-blue-700 hover:bg-blue-700" onclick="window.startTask('${task.id}')" title="Начать выполнение">${iconPlay}</button>
                     `;
                 } else if (task.status === 'inProgress') {
                     statusIndicator = `<span class="text-xs font-bold text-purple-700 animate-pulse ml-2">(В процессе...)</span>`;
                     buttons = `
-                        <button class="task-spell-btn bg-green-600 text-white border-green-700 hover:bg-green-700" onclick="window.completeTask('${task.id}')" title="Завершить">✓</button>
+                        <button class="task-spell-btn bg-green-600 text-white border-green-700 hover:bg-green-700" onclick="window.completeTask('${task.id}')" title="Завершить">${iconCheck}</button>
                     `;
                 } else if (task.status === 'completed') {
                     buttons = `
-                        <button class="task-spell-btn bg-gray-500 text-white border-gray-600 hover:bg-gray-600" onclick="window.reactivateTask('${task.id}')" title="Активировать снова">↩️</button>
+                        <button class="task-spell-btn bg-gray-500 text-white border-gray-600 hover:bg-gray-600" onclick="window.reactivateTask('${task.id}')" title="Активировать снова">${iconUndo}</button>
                     `;
                 }
-                buttons += ` <button class="task-spell-btn bg-red-600 text-white border-red-700 hover:bg-red-700" onclick="window.deleteTask('${task.id}')" title="Удалить">×</button>`;
+                buttons += ` <button class="task-spell-btn bg-red-600 text-white border-red-700 hover:bg-red-700" onclick="window.deleteTask('${task.id}')" title="Удалить">${iconDelete}</button>`;
+
+                let assigneeTag = '';
+                if (task.assignedTo && task.assignedTo.uid !== 'everyone') {
+                    assigneeTag = `<span class="assignee-tag">Для: ${task.assignedTo.nickname}</span>`;
+                }
+                
+                let descriptionEl = '';
+                if (task.description) {
+                    descriptionEl = `<p class="text-xs text-gray-700 mt-1 pl-1 truncate">${task.description}</p>`;
+                }
 
                 el.className = `task-item p-3 bg-white bg-opacity-80 rounded-lg shadow-sm priority-${task.priority} status-${task.status} mb-2`;
                 el.innerHTML = `
                     <div class="flex justify-between items-start gap-2">
-                        <div class="flex-grow">
-                            <span class="task-tag" style="background-color: ${tagColor}">${catNames[task.category]}</span>
-                            <span class="text-gray-900 font-medium cursor-pointer hover:underline" onclick="window.showTaskDetails('${task.id}')">${task.text}</span>
-                            ${statusIndicator}
+                        <div class="flex-grow min-w-0"> <!-- min-w-0 для работы truncate -->
+                            <div>
+                                <span class="task-tag" style="background-color: ${tagColor}">${catNames[task.category]}</span>
+                                <span class="text-gray-900 font-medium cursor-pointer hover:underline" onclick="window.showTaskDetails('${task.id}')">${task.text}</span>
+                                ${statusIndicator}
+                                ${assigneeTag}
+                            </div>
+                            ${descriptionEl} <!-- Описание добавлено сюда -->
                             ${taskDate ? `<div class="text-xs text-yellow-900 font-bold mt-1">📅 ${dateString}</div>` : ''}
                         </div>
                         <div class="flex gap-2 flex-shrink-0">
@@ -1246,11 +1481,17 @@
                         el.className = `p-3 rounded-lg flex items-center gap-3 status-${task.status} task-item`;
                         const tagColor = catColors[task.category] || '#666';
                         
+                        let assigneeTag = '';
+                        if (task.assignedTo && task.assignedTo.uid !== 'everyone') {
+                            assigneeTag = `<span class="assignee-tag !ml-0 !mr-2">${task.assignedTo.nickname}</span>`;
+                        }
+                        
                         el.innerHTML = `
                             <div class="flex-shrink-0 w-20 text-center font-bold text-yellow-900 bg-yellow-100 p-2 rounded">
                                 ${task.date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                             <div class="flex-grow">
+                                ${assigneeTag}
                                 <span class="task-tag" style="background-color: ${tagColor}">${catNames[task.category]}</span>
                                 <span class="font-medium cursor-pointer hover:underline" onclick="window.showTaskDetails('${task.id}')">${task.text}</span>
                                 ${task.status === 'inProgress' ? '<span class="text-xs font-bold text-purple-700 ml-2">(В процессе...)</span>' : ''}
@@ -1260,13 +1501,13 @@
                         const controls = document.createElement('div');
                         controls.className = 'flex gap-2 flex-shrink-0';
                         if (task.status === 'pending') {
-                             controls.innerHTML = `<button class="task-spell-btn bg-blue-600 text-white border-blue-700 hover:bg-blue-700" onclick="window.startTask('${task.id}')" title="Начать выполнение">▶</button>`;
+                             controls.innerHTML = `<button class="task-spell-btn bg-blue-600 text-white border-blue-700 hover:bg-blue-700" onclick="window.startTask('${task.id}')" title="Начать выполнение">${iconPlay}</button>`;
                         } else if (task.status === 'inProgress') {
-                             controls.innerHTML = `<button class="task-spell-btn bg-green-600 text-white border-green-700 hover:bg-green-700" onclick="window.completeTask('${task.id}')" title="Завершить">✓</button>`;
+                             controls.innerHTML = `<button class="task-spell-btn bg-green-600 text-white border-green-700 hover:bg-green-700" onclick="window.completeTask('${task.id}')" title="Завершить">${iconCheck}</button>`;
                         } else if (task.status === 'completed') {
-                             controls.innerHTML = `<button class="task-spell-btn bg-gray-500 text-white border-gray-600 hover:bg-gray-600" onclick="window.reactivateTask('${task.id}')" title="Активировать снова">↩️</button>`;
+                             controls.innerHTML = `<button class="task-spell-btn bg-gray-500 text-white border-gray-600 hover:bg-gray-600" onclick="window.reactivateTask('${task.id}')" title="Активировать снова">${iconUndo}</button>`;
                         }
-                        controls.innerHTML += ` <button class="task-spell-btn bg-red-600 text-white border-red-700 hover:bg-red-700" onclick="window.deleteTask('${task.id}')" title="Удалить">×</button>`;
+                        controls.innerHTML += ` <button class="task-spell-btn bg-red-600 text-white border-red-700 hover:bg-red-700" onclick="window.deleteTask('${task.id}')" title="Удалить">${iconDelete}</button>`;
                         
                         el.appendChild(controls);
                         dayTaskListEl.appendChild(el);
@@ -1287,7 +1528,8 @@
             });
 
 
-            // --- ТАЙМЕР (без изменений) ---
+            // --- ТАЙМЕР ---
+            // ИЗМЕНЕНИЕ: Вся логика таймера возвращена к оригиналу
             let timerTime = 25 * 60; let defaultTime = 25; let timerInterval = null; let isRunning = false;
             const timerDisplay = document.getElementById('timerDisplay'); const timerInput = document.getElementById('timerInput');
             const timerStatus = document.getElementById('timerStatus'); const startTimerBtn = document.getElementById('startTimerBtn');
@@ -1320,10 +1562,11 @@
                     timerInterval = setInterval(() => {
                         timerTime--; updateDisplay();
                         if (timerTime <= 0) {
-                            clearInterval(timerInterval); isAppInitialized = false;
+                            clearInterval(timerInterval); isRunning = false; // Было isAppInitialized = false
                             if(audioInit) window.alarmSynth.triggerAttackRelease("C5", "1s");
                             timerStatus.textContent = "Готово! Отдохните."; startTimerBtn.textContent = "Варить!";
                             timerTime = defaultTime * 60;
+                            updateDisplay(); // Добавлено обновление дисплея после сброса
                         }
                     }, 1000);
                 }
@@ -1352,16 +1595,18 @@
                 newTaskNewSubtask.value = '';
                 document.querySelector('input[name="taskCat"][value="students"]').checked = true;
                 document.getElementById('taskPriority').value = 'medium';
+                document.getElementById('taskAssignee').value = 'everyone';
             }
 
             // --- ДОБАВЛЕНИЕ ЗАДАЧИ ---
-            // (без изменений)
             const datePicker = flatpickr("#taskDueDate", { locale: "ru", enableTime: true, time_24hr: true, dateFormat: "Y-m-d H:i" });
             
+            // ИЗМЕНЕНИЕ: Возвращен if(!audioInit) initAudio()
             openTaskModalBtn.addEventListener('click', () => { 
                 resetAddTaskModal(); 
+                updateAssigneeSelectors(); 
                 modal.style.display = 'flex'; 
-                if(!audioInit) initAudio(); 
+                if(!audioInit) initAudio(); // <-- Возвращено
             });
             closeTaskModalBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
@@ -1387,11 +1632,22 @@
                 
                 const subtasks = [];
                 newTaskSubtaskList.querySelectorAll('.subtask-item').forEach(itemEl => {
-                    const subtaskText = itemEl.querySelector('.subtask-text').textContent.trim();
-                    if (subtaskText) {
-                        subtasks.push({ text: subtaskText, done: false });
+                    const subtaskTextEl = itemEl.querySelector('.subtask-text');
+                    if (subtaskTextEl) {
+                        const subtaskText = subtaskTextEl.textContent.trim();
+                        if (subtaskText) {
+                            subtasks.push({ text: subtaskText, done: false });
+                        }
                     }
                 });
+
+                const assigneeValue = taskAssigneeSelect.value;
+                let assignedTo = { uid: 'everyone', nickname: 'Everyone' };
+                if (assigneeValue === 'me') {
+                    assignedTo = { uid: currentUserId, nickname: currentUserNickname };
+                } else if (assigneeValue === 'partner' && otherUserInfo.uid) {
+                    assignedTo = { uid: otherUserInfo.uid, nickname: otherUserInfo.nickname };
+                }
 
                 const newTask = {
                     text: text,
@@ -1401,7 +1657,8 @@
                     priority: document.getElementById('taskPriority').value,
                     category: document.querySelector('input[name="taskCat"]:checked').value,
                     status: 'pending', 
-                    createdBy: currentUserId
+                    createdBy: currentUserId,
+                    assignedTo: assignedTo 
                 };
                 
                 try {
@@ -1429,7 +1686,7 @@
                 const el = document.createElement('div');
                 el.className = 'subtask-item';
                 el.innerHTML = `
-                    <span class="magic-input subtask-text">${text}</span>
+                    <span class="magic-input subtask-text" style="display: block; width: 100%;">${text}</span>
                     <button class="subtask-delete-btn" type="button">&times;</button>
                 `;
                 newTaskSubtaskList.appendChild(el);
@@ -1485,9 +1742,9 @@
             }
             updateFilterButtons(filterActiveBtn); 
 
-            // (без изменений)
+            // ИЗМЕНЕНИЕ: Возвращен if(!audioInit) initAudio()
             hatSortBtn.addEventListener('click', () => {
-                if(!audioInit) initAudio();
+                if(!audioInit) initAudio(); // <-- Возвращено
                 const activeTasks = allTasks.filter(t => t.status === 'pending' || t.status === 'inProgress');
                 if(activeTasks.length === 0) {
                     console.warn("Шляпе нечего выбирать!");
@@ -1544,6 +1801,8 @@
             // --- СЛУШАТЕЛИ И ФУНКЦИИ (Детали Задачи) ---
             // (без изменений)
             
+            detailDatePicker = flatpickr("#taskDetailDateEdit", { locale: "ru", enableTime: true, time_24hr: true, dateFormat: "Y-m-d H:i" });
+            
             window.showTaskDetails = (id) => {
                 currentEditingTaskId = id;
                 const task = allTasks.find(t => t.id === id);
@@ -1552,18 +1811,58 @@
                     return;
                 }
                 
-                taskDetailTitle.textContent = task.text;
-                taskDetailDescriptionText.textContent = task.description || '...';
-                taskDetailDescriptionEdit.value = task.description || '';
-                
+                populateTaskDetailView(task);
                 toggleTaskDetailEdit(false); 
                 renderSubtasks(task.subtasks || [], false); 
-                
                 taskDetailModal.style.display = 'flex';
             };
+            
+            function populateTaskDetailView(task) {
+                taskDetailTitle.textContent = task.text;
+                taskDetailDescriptionText.textContent = task.description || '...';
+                
+                const catName = catNames[task.category] || 'Неизвестно';
+                const catColor = catColors[task.category] || '#666';
+                taskDetailCategory.textContent = catName;
+                taskDetailCategory.style.backgroundColor = catColor;
+                
+                const priorities = { low: 'Обычный', medium: 'Важный', high: 'Срочный!' };
+                taskDetailPriority.textContent = priorities[task.priority] || '...';
+                
+                taskDetailDate.textContent = task.date 
+                    ? task.date.toLocaleString('ru', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) 
+                    : 'Не установлен';
+                
+                taskDetailAssignee.textContent = task.assignedTo ? task.assignedTo.nickname : 'Для всех';
+            }
+            
+            function populateTaskDetailEdit(task) {
+                taskDetailTitleEdit.value = task.text;
+                taskDetailDescriptionEdit.value = task.description || '';
+                
+                const catRadio = taskDetailCategoryEdit.querySelector(`input[value="${task.category}"]`);
+                if (catRadio) catRadio.checked = true;
+                
+                if (task.date) {
+                    detailDatePicker.setDate(task.date);
+                } else {
+                    detailDatePicker.clear();
+                }
+                
+                taskDetailPriorityEdit.value = task.priority;
+                
+                updateAssigneeSelectors(); 
+                if (!task.assignedTo || task.assignedTo.uid === 'everyone') {
+                    taskDetailAssigneeEdit.value = 'everyone';
+                } else if (task.assignedTo.uid === currentUserId) {
+                    taskDetailAssigneeEdit.value = 'me';
+                } else if (task.assignedTo.uid === otherUserInfo.uid) {
+                    taskDetailAssigneeEdit.value = 'partner';
+                } else {
+                    taskDetailAssigneeEdit.value = 'everyone';
+                }
+            }
 
-            // ИЗМЕНЕНИЕ: Кнопка закрытия модалки деталей теперь также использует делегирование
-            // (на случай, если она была перерисована, хотя в данном коде это не так)
             closeTaskDetailModalBtn.addEventListener('click', () => {
                 taskDetailModal.style.display = 'none';
                 currentEditingTaskId = null;
@@ -1701,9 +2000,13 @@
                 taskDetailSaveBtn.disabled = true;
                 taskDetailSaveBtn.textContent = "Сохранение...";
 
+                const newText = taskDetailTitleEdit.value.trim();
                 const newDescription = taskDetailDescriptionEdit.value.trim(); 
+                const newCategory = taskDetailCategoryEdit.querySelector('input[name="taskCatDetail"]:checked')?.value || 'students';
+                const newPriority = taskDetailPriorityEdit.value;
+                const newDateStr = taskDetailDateEdit.value;
+                
                 const newSubtasks = [];
-
                 taskDetailSubtaskList.querySelectorAll('.subtask-item').forEach(itemEl => {
                     const textInput = itemEl.querySelector('.subtask-text');
                     const text = textInput ? textInput.value.trim() : ''; 
@@ -1712,17 +2015,32 @@
                         newSubtasks.push({ text, done });
                     }
                 });
+                
+                const assigneeValue = taskDetailAssigneeEdit.value;
+                let newAssignedTo = { uid: 'everyone', nickname: 'Everyone' };
+                if (assigneeValue === 'me') {
+                    newAssignedTo = { uid: currentUserId, nickname: currentUserNickname };
+                } else if (assigneeValue === 'partner' && otherUserInfo.uid) {
+                    newAssignedTo = { uid: otherUserInfo.uid, nickname: otherUserInfo.nickname };
+                }
+                
+                const updates = {
+                    text: newText,
+                    description: newDescription,
+                    category: newCategory,
+                    priority: newPriority,
+                    date: newDateStr ? Timestamp.fromDate(new Date(newDateStr)) : null,
+                    subtasks: newSubtasks,
+                    assignedTo: newAssignedTo
+                };
 
                 try {
                     const taskRef = doc(db, `/artifacts/${appId}/public/data/tasks`, currentEditingTaskId);
-                    await updateDoc(taskRef, {
-                        description: newDescription,
-                        subtasks: newSubtasks
-                    });
+                    await updateDoc(taskRef, updates);
                     
-                    taskDetailModal.style.display = 'none';
-                    currentEditingTaskId = null;
-                    isTaskDetailEditing = false; 
+                    toggleTaskDetailEdit(false);
+                    const updatedTask = { ...allTasks.find(t => t.id === currentEditingTaskId), ...updates, date: newDateStr ? new Date(newDateStr) : null };
+                    populateTaskDetailView(updatedTask);
 
                 } catch (e) {
                     console.error("Ошибка сохранения деталей задачи:", e);
@@ -1740,9 +2058,17 @@
                 
                 taskDetailEditBtn.classList.toggle('hidden', isEditing);
                 taskDetailSaveBtn.classList.toggle('hidden', !isEditing);
+                
+                taskDetailViewBlock.classList.toggle('hidden', isEditing);
+                taskDetailEditBlock.classList.toggle('hidden', !isEditing);
+                
                 taskDetailAddSubtaskContainer.classList.toggle('hidden', !isEditing);
-                taskDetailDescriptionText.classList.toggle('hidden', isEditing);
-                taskDetailDescriptionEdit.classList.toggle('hidden', !isEditing);
+                
+                if (isEditing) {
+                    populateTaskDetailEdit(task);
+                } else {
+                    populateTaskDetailView(task);
+                }
                 
                 renderSubtasks(task.subtasks || [], isEditing);
             }
