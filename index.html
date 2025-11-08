@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ежедневный Пророк (Коллективный)</title>
+    <!-- ИЗМЕНЕНИЕ: Добавлен красивый SVG-фавикон в виде магической звезды -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 0L19.5359 12.4641L32 16L19.5359 19.5359L16 32L12.4641 19.5359L0 16L12.4641 12.4641L16 0Z' fill='%234a2c2a'/%3E%3C/svg%3E" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -1567,6 +1569,17 @@
                             timerStatus.textContent = "Готово! Отдохните."; startTimerBtn.textContent = "Варить!";
                             timerTime = defaultTime * 60;
                             updateDisplay(); // Добавлено обновление дисплея после сброса
+
+                            // --- ИЗМЕНЕНИЕ: Останавливаем шум при окончании таймера ---
+                            if (audioInit && brownNoise) {
+                                brownNoise.volume.rampTo(-Infinity, 1);
+                                const noiseBtn = document.getElementById('noiseToggleBtn');
+                                if (noiseBtn) {
+                                    noiseBtn.classList.remove('active');
+                                    noiseBtn.style.opacity = 0.6;
+                                }
+                            }
+                            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
                         }
                     }, 1000);
                 }
