@@ -17,7 +17,6 @@
     
     <!-- 
       ИМПОРТ И НАСТРОЙКА FIREBASE
-      (без изменений)
     -->
     <script type="module">
         // --- ТВОЙ КОНФИГ FIREBASE (встроен напрямую) ---
@@ -100,12 +99,6 @@
         .btn-timer-small:hover { background-color: #6d413c; }
         .btn-icon-small { background: none; border: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; font-size: 1.1rem; }
         .btn-icon-small:hover, .btn-icon-small.active { opacity: 1; }
-
-        /* ИСПРАВЛЕНИЕ iOS: Убедимся, что инпут таймера имеет цвет */
-        #timerInput {
-            color: #4a2c2a;
-            background-color: #fff;
-        }
 
         /* --- КАТЕГОРИИ --- */
         .category-pill { display: inline-block; cursor: pointer; font-size: 0.85rem; font-weight: bold; padding: 0.25rem 0.75rem; border-radius: 9999px; color: white; border: 2px solid transparent; transition: all 0.2s; opacity: 0.7; }
@@ -195,8 +188,8 @@
             color: white;
         }
         .task-spell-btn svg {
-            width: 1em; 
-            height: 1em;
+            width: 1em; /* 16px, соответствует font-size */
+            height: 1em; /* 16px */
         }
         .task-spell-btn:hover {
             transform: scale(1.1);
@@ -213,7 +206,7 @@
         /* --- СТИЛИ (Присутствие) --- */
         .presence-indicator { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.3); transition: background-color 0.3s; }
         .presence-online { background-color: #22c55e; }
-        .presence-offline { background-color: #9ca3af; } /* ИЗМЕНЕНО: обратно на серый */
+        .presence-offline { background-color: #9ca3af; } /* Возвращено на серый */
 
         /* --- СТИЛИ (Экран входа) --- */
         #authOverlay {
@@ -270,8 +263,6 @@
             background-image: url('https://placehold.co/200x200/fef08a/fef08a.png');
             background-size: contain; background-repeat: no-repeat;
             filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3));
-            /* ИСПРАВЛЕНИЕ iOS: Улучшаем производительность перетаскивания */
-            will-change: transform;
         }
         .sticker-delete-btn {
             position: absolute; top: 4px; right: 4px;
@@ -339,13 +330,47 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
 
+        /* --- ИЗМЕНЕНИЕ: Стили для подзадач на главной --- */
+        .main-subtask-list {
+            margin-top: 0.75rem; /* 12px */
+            padding-top: 0.5rem; /* 8px */
+            border-top: 1px solid rgba(74, 44, 42, 0.1); /* Faint separator */
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem; /* 4px */
+        }
+        .main-subtask-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* 8px */
+            font-size: 0.85rem; /* 13.6px */
+            color: #4a2c2a; /* Brown text */
+        }
+        .main-subtask-item input[type="checkbox"] {
+            width: 0.9rem; /* 14.4px */
+            height: 0.9rem; /* 14.4px */
+            flex-shrink: 0;
+            border-radius: 3px;
+            border: 2px solid #c7a265;
+            cursor: pointer;
+        }
+        .main-subtask-item label {
+            flex-grow: 1;
+            cursor: pointer;
+            opacity: 0.9;
+        }
+        .main-subtask-item input[type="checkbox"]:checked + label {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        /* --- КОНЕЦ ИЗМЕНЕНИЯ --- */
+
     </style>
 </head>
 <body class="p-4">
 
     <!-- 
       ЭКРАН АУТЕНТИФИКАЦИИ
-      (без изменений)
     -->
     <div id="authOverlay">
         <div class="magic-parchment p-6 md:p-8 w-full max-w-md mx-4">
@@ -379,7 +404,6 @@
 
     <!-- 
       КОНТЕЙНЕР ДЛЯ СТИКЕРОВ
-      (без изменений)
     -->
     <div id="stickerBackdrop"></div>
     
@@ -401,12 +425,8 @@
             </div>
             <div id="timerDisplayContainer" class="relative">
                 <div id="timerDisplay" class="timer-display-compact">25:00</div>
-                <!-- 
-                  ИСПРАВЛЕНИЕ iOS: 
-                  type="number" заменен на type="text" и inputmode="numeric" 
-                  для исправления бага с рендерингом текста.
-                -->
-                <input type="text" inputmode="numeric" pattern="[0-9]*" id="timerInput" class="magic-input absolute inset-0 w-full text-center text-2xl hidden" value="25">
+                <!-- ИЗМЕНЕНИЕ: type="number" для совместимости с iOS -->
+                <input type="number" id="timerInput" class="magic-input absolute inset-0 w-full text-center text-2xl hidden" value="25" min="1" max="180" style="color-scheme: light;"> <!-- Добавлен color-scheme -->
             </div>
             <div id="timerStatus" class="text-center text-xs text-gray-600 h-4 truncate mb-2">Котелок остыл</div>
             <div class="flex gap-2 justify-center">
@@ -427,7 +447,6 @@
 
         <!-- 
             ГЛАВНАЯ НАВИГАЦИЯ 
-            (без изменений)
         -->
         <nav class="magic-nav">
             <button id="nav-tasks" class="nav-btn active">📜 Задачи</button>
@@ -448,22 +467,17 @@
             </div>
             
             <main class="magic-parchment p-4 md:p-6">
-                 <!-- 
-                    ИЗМЕНЕНИЕ: Модуль Присутствия 
-                    Структура HTML изменена, чтобы всегда отображать обоих пользователей
-                 -->
+                 <!-- ИЗМЕНЕНИЕ: Модуль присутствия обновлен -->
                  <div id="presenceContainer" class="mb-4 p-3 bg-yellow-50 bg-opacity-50 rounded-lg border border-yellow-800 border-opacity-30">
                     <div class="flex flex-wrap justify-around items-center gap-4">
-                        <!-- Слот для Yura Marev (имя будет задано JS, если он не текущий юзер) -->
                         <div id="currentUserStatus" class="text-center">
-                            <span id="currentUserDisplay" class="font-bold text-gray-800 text-sm truncate">...</span>
+                            <span id="currentUserDisplay" class="font-bold text-gray-800 text-sm truncate">Загрузка...</span>
                             <div class="flex items-center justify-center gap-2 mt-1">
                                 <div id="currentUserIndicator" class="presence-indicator presence-offline"></div>
                             </div>
                         </div>
-                        <!-- Слот для KoshkaKartoshka (имя будет задано JS) -->
                         <div id="otherUserStatus" class="text-center">
-                            <span id="otherUserName" class="font-bold text-gray-800 text-sm truncate">Оффлайн</span>
+                            <span id="otherUserName" class="font-bold text-gray-800 text-sm truncate">Партнер...</span>
                             <div class="flex items-center justify-center gap-2 mt-1">
                                 <div id="otherUserIndicator" class="presence-indicator presence-offline"></div>
                             </div>
@@ -471,14 +485,12 @@
                     </div>
                  </div>
                  
-                 <!-- Фильтры (без изменений) -->
                  <div class="view-toggle">
                     <button id="filterActive" class="view-btn active">Активные</button>
                     <button id="filterHigh" class="view-btn">Срочные</button>
                     <button id="filterCompleted" class="view-btn">Архив</button>
                  </div>
 
-                 <!-- Список задач (без изменений) -->
                  <div id="taskListContainer" class="mt-4">
                     <div id="taskList" class="space-y-3 min-h-[100px]">
                         <p class="text-center text-gray-500 italic">Загрузка заклинаний...</p>
@@ -488,7 +500,7 @@
             </main>
         </div>
 
-        <!-- ВЬЮШКА: Календарь (без изменений) -->
+        <!-- ВЬЮШКА: Календарь -->
         <div id="calendarView" class="view-container hidden">
             <div class="magic-parchment p-4 md:p-6">
                 <div id='calendar'></div> 
@@ -500,7 +512,6 @@
 
     <!-- 
         Модальное окно добавления задачи
-        (без изменений)
     -->
     <div id="addTaskModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative">
@@ -559,7 +570,7 @@
         </div>
     </div>
     
-    <!-- Модальное окно для создания Стикера (без изменений) -->
+    <!-- Модальное окно для создания Стикера -->
     <div id="stickerModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative max-w-md">
             <button id="closeStickerModalBtn" class="absolute top-2 right-2 text-2xl text-yellow-900 hover:text-yellow-600">&times;</button>
@@ -571,7 +582,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно для просмотра дня (без изменений) -->
+    <!-- Модальное окно для просмотра дня -->
     <div id="dayViewModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative">
             <button id="closeDayViewModalBtn" class="absolute top-2 right-2 text-2xl text-yellow-900 hover:text-yellow-600">&times;</button>
@@ -582,7 +593,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно Настроек (без изменений) -->
+    <!-- Модальное окно Настроек -->
     <div id="settingsModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative max-w-md">
             <button id="closeSettingsModalBtn" class="absolute top-2 right-2 text-2xl text-yellow-900 hover:text-yellow-600">&times;</button>
@@ -601,10 +612,9 @@
             </div>
         </div>
     </div>
-    
+
     <!-- 
         Модальное окно Деталей Задачи
-        (без изменений)
     -->
     <div id="taskDetailModal" class="modal-overlay">
         <div class="magic-parchment modal-content p-6 relative">
@@ -709,7 +719,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // --- СЕРВИСЫ FIREBASE ---
-            // (без изменений)
             while (typeof window.firebaseServices === 'undefined') {
                 await new Promise(resolve => setTimeout(resolve, 50));
             }
@@ -725,7 +734,7 @@
                 ref, set, onValue, onDisconnect
             } = window.firebaseServices;
 
-            // --- ИЗМЕНЕНИЕ: Заменяем массив имен на карту UID <-> Имя ---
+            // --- ИЗМЕНЕНИЕ: Карта UID для пользователей ---
             const KNOWN_USER_MAP = {
               "bm114yHgXOTtjg7JMf60LHrG3X83": "Yura Marev",
               "W79T0QBZ9Pa35wnIFnCvVQBonkQ2": "KoshkaKartoshka"
@@ -737,13 +746,11 @@
             let calendar; 
             let currentUserId = null;
             let currentUserNickname = null; 
-            // ИЗМЕНЕНИЕ: otherUserInfo теперь используется для хранения ИМЕНИ партнера, 
-            // ИЗМЕНЕНИЕ: otherUserInfo теперь используется для хранения ИМЕНИ и UID партнера
-            let otherUserInfo = { uid: null, nickname: 'Оффлайн' };
+            let otherUserInfo = { uid: null, nickname: 'Оффлайн' }; // UID и имя партнера
             let currentFilter = 'active'; 
             let tasksUnsubscribe = null; 
             let stickersUnsubscribe = null; 
-            let presenceUnsubscribe = null; 
+            let presenceUnsubscribe = null; // Слушатель для партнера
             let isAppInitialized = false; 
             let currentEditingTaskId = null; 
             let isTaskDetailEditing = false; 
@@ -823,19 +830,17 @@
             const filterCompletedBtn = document.getElementById('filterCompleted');
             const hatSortBtn = document.getElementById('hatSortBtn');
             
-            // ИЗМЕНЕНИЕ iOS: Глобальные переменные для перетаскивания
             let isStickerDragging = false;
             let currentDraggingSticker = null;
             let stickerOffsetX = 0;
             let stickerOffsetY = 0;
 
-            /* Иконки SVG (без изменений) */
             const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M17.4,10.4L5.8,17.6C5.5,17.8,5.1,17.7,4.9,17.4C4.8,17.2,4.8,16.9,4.9,16.7L8,10L4.9,3.3C4.8,3.1,4.8,2.8,4.9,2.6C5.2,2.3,5.5,2.2,5.8,2.4L17.4,9.6C17.7,9.8,17.8,10.2,17.6,10.4C17.6,10.4,17.5,10.4,17.4,10.4z"/></svg>`;
             const iconCheck = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M18.5,3.1l-9.8,9.8L4.3,8.4C4,8.1,3.5,8.1,3.2,8.4c-0.3,0.3-0.3,0.8,0,1.1l5.1,5.1c0.1,0.1,0.3,0.2,0.5,0.2s0.4-0.1,0.5-0.2l10.6-10.6c0.3-0.3,0.3-0.8,0-1.1C19.3,2.8,18.8,2.8,18.5,3.1z"/></svg>`;
             const iconUndo = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M16.5,10.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S16.8,10.5,16.5,10.5z M11.5,12.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S11.8,12.5,11.5,12.5z M10,18.5C5.3,18.5,1.5,14.7,1.5,10S5.3,1.5,10,1.5c2.4,0,4.6,1,6.2,2.6l-1.4,1.4c-0.2,0.2-0.2,0.5,0,0.7s0.5,0.2,0.7,0l3.2-3.2c0.2-0.2,0.2-0.5,0-0.7L15.4,0.7c-0.2-0.2-0.5-0.2-0.7,0s-0.2,0.5,0,0.7l1.5,1.5C14.6,1.4,12.4,0.5,10,0.5C4.8,0.5,0.5,4.8,0.5,10s4.3,9.5,9.5,9.5s9.5-4.3,9.5-9.5c0-0.3-0.2-0.5-0.5-0.5s-0.5,0.2-0.5,0.5C18.5,14.7,14.7,18.5,10,18.5z"/></svg>`;
             const iconDelete = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.7,10l4.6-4.6c0.2-0.2,0.2-0.5,0-0.7s-0.5-0.2-0.7,0L10,9.3L5.4,4.7c-0.2-0.2-0.5-0.2-0.7,0s-0.2,0.5,0,0.7L9.3,10l-4.6,4.6c-0.2,0.2-0.2,0.5,0,0.7C4.8,15.4,4.9,15.5,5,15.5s0.2,0,0.4-0.1L10,10.7l4.6,4.6c0.1,0.1,0.2,0.1,0.4,0.1s0.3-0.1,0.4-0.2c0.2-0.2,0.2-0.5,0-0.7L10.7,10z"/></svg>`;
 
-            // --- АУДИО (без изменений) ---
+            // --- АУДИО ---
             let audioInit = false;
             let brownNoise = null;
             const initAudio = async () => {
@@ -856,7 +861,7 @@
                 }
             };
 
-            // --- ЦВЕТА И ИМЕНА КАТЕГОРИЙ (без изменений) ---
+            // --- ЦВЕТА И ИМЕНА КАТЕГОРИЙ ---
             const catColors = {
                 students: '#3b82f6', home: '#d97706', projects: '#9333ea',
                 hobbies: '#10b981', love: '#ec4899', shop: '#eab308', docs: '#64748b'
@@ -866,7 +871,7 @@
                 hobbies: 'Хобби', love: 'Любовь', shop: 'Магазин', docs: 'Документы'
             };
             
-            // --- ЛОГИКА АУТЕНТИФИКАЦИИ (без изменений) ---
+            // --- ЛОГИКА АУТЕНТИФИКАЦИИ ---
             
             authTabLogin.addEventListener('click', () => {
                 authTabLogin.classList.add('active');
@@ -948,7 +953,7 @@
             });
             
             
-            // --- КАЛЕНДАРЬ (INIT) (без изменений) ---
+            // --- КАЛЕНДАРЬ (INIT) ---
             const initCalendar = () => {
                 const calendarEl = document.getElementById('calendar');
                 if (calendar) {
@@ -981,7 +986,7 @@
                 calendar.render();
             };
             
-            // --- ФУНКЦИЯ: updateCalendarCounters (без изменений) ---
+            // --- ФУНКЦИЯ: updateCalendarCounters ---
             function updateCalendarCounters() {
                 if (!calendar) return; 
 
@@ -1031,7 +1036,6 @@
             }
 
             // ГЛАВНЫЙ СЛУШАТЕЛЬ СОСТОЯНИЯ AUTH
-            // (ИЗМЕНЕН: Логика определения партнера по UID)
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     console.log("Пользователь аутентифицирован:", user.uid);
@@ -1099,7 +1103,7 @@
                         listenForTasks();
                         listenForStickers(); 
                         setupPresence(); 
-                        listenForOtherUserPresence(); // Эта функция теперь ищет по имени
+                        listenForOtherUserPresence(); // Запускается СЕЙЧАС, когда otherUserInfo.uid установлен
                         initCalendar(); 
                         isAppInitialized = true;
                     }
@@ -1153,14 +1157,13 @@
                 }
             });
 
-            // (без изменений)
             function setupPresence() {
                 if (!currentUserId || !currentUserNickname) return; 
                 
                 const userStatusRef = ref(rtdb, `/artifacts/${appId}/presence/${currentUserId}`);
                 const userInfo = {
                     online: true,
-                    name: currentUserNickname, 
+                    name: currentUserNickname, // Используем актуальный никнейм
                     lastSeen: new Date().toISOString()
                 };
                 
@@ -1230,7 +1233,6 @@
                 });
             }
             
-            // (без изменений)
             function updateAssigneeSelectors() {
                 const partnerExists = otherUserInfo.uid !== null; // Теперь проверяем наличие UID
                 const partnerName = (otherUserInfo.nickname !== 'Оффлайн') ? otherUserInfo.nickname : 'Партнер';
@@ -1246,8 +1248,37 @@
                 editPartnerOption.disabled = !partnerExists;
             }
 
+            // --- ИЗМЕНЕНИЕ: Новая глобальная функция ---
+            // Для переключения подзадач прямо с главной страницы
+            window.toggleSubtaskOnMainList = async (taskId, subtaskIndex, isChecked) => {
+                const task = allTasks.find(t => t.id === taskId);
+                if (!task) {
+                    console.error("Task not found for subtask toggle:", taskId);
+                    return;
+                }
+                
+                // Глубокое копирование, чтобы не мутировать allTasks
+                const newSubtasks = JSON.parse(JSON.stringify(task.subtasks || []));
+                
+                if (newSubtasks[subtaskIndex]) {
+                    newSubtasks[subtaskIndex].done = isChecked;
+                } else {
+                    console.error("Subtask index out of bounds:", subtaskIndex);
+                    return;
+                }
+                
+                try {
+                    const taskRef = doc(db, `/artifacts/${appId}/public/data/tasks`, taskId);
+                    await updateDoc(taskRef, {
+                        subtasks: newSubtasks
+                    });
+                    // onSnapshot поймает изменение и перерисует список
+                } catch (e) {
+                    console.error("Ошибка обновления подзадачи с главной:", e);
+                }
+            };
             
-            // --- ЛОГИКА НАВИГАЦИИ (без изменений) ---
+            // --- ЛОГИКА НАВИГАЦИИ ---
             
             function showView(viewId) {
                 views.forEach(view => view.classList.add('hidden'));
@@ -1279,7 +1310,7 @@
             showView('tasksView');
             
 
-            // --- ЛОГИКА ЗАДАЧ (FIRESTORE) (без изменений) ---
+            // --- ЛОГИКА ЗАДАЧ (FIRESTORE) ---
             function listenForTasks() {
                 if (!currentUserId) return;
                 if (tasksUnsubscribe) tasksUnsubscribe(); 
@@ -1293,6 +1324,14 @@
                             ...data,
                             date: data.date ? (data.date.toDate ? data.date.toDate() : new Date(data.date)) : null
                         };
+                    });
+                    
+                    // Фильтруем задачи, которые может видеть текущий пользователь
+                    allTasks = allTasks.filter(task => {
+                        return !task.assignedTo || 
+                               task.assignedTo.uid === 'everyone' || 
+                               task.assignedTo.uid === currentUserId ||
+                               (otherUserInfo.uid && task.assignedTo.uid === otherUserInfo.uid);
                     });
                     
                     allTasks.sort((a, b) => {
@@ -1329,7 +1368,7 @@
                             // Обновляем подзадачи в любом случае
                             renderSubtasks(updatedTask.subtasks || [], isTaskDetailEditing);
                         } else {
-                            // Задача была удалена, закрываем модалку
+                            // Задача была удалена (или стала невидимой), закрываем модалку
                             taskDetailModal.style.display = 'none';
                             currentEditingTaskId = null;
                         }
@@ -1340,7 +1379,7 @@
                 });
             }
 
-            // --- РЕНДЕРИНГ ЗАДАЧ (СПИСОК) (без изменений) ---
+            // --- РЕНДЕРИНГ ЗАДАЧ (СПИСОК) ---
             const renderTasks = () => {
                 if (!taskListEl) {
                     console.error("taskListEl не найден! HTML структура может быть нарушена.");
@@ -1370,7 +1409,7 @@
                 }
             };
 
-            // (без изменений)
+            // --- ИЗМЕНЕНИЕ: Обновленная функция createTaskElement ---
             function createTaskElement(task) {
                 const el = document.createElement('div');
                 const tagColor = catColors[task.category] || '#666';
@@ -1406,6 +1445,36 @@
                     descriptionEl = `<p class="text-xs text-gray-700 mt-1 pl-1 truncate">${task.description}</p>`;
                 }
 
+                // --- ИЗМЕНЕНИЕ: Блок рендеринга подзадач ---
+                let subtasksEl = '';
+                if (task.subtasks && task.subtasks.length > 0) {
+                    subtasksEl = '<div class="main-subtask-list">';
+                    
+                    const completedCount = task.subtasks.filter(s => s.done).length;
+                    const totalCount = task.subtasks.length;
+                    
+                    // Добавляем счетчик
+                    subtasksEl += `<div class="text-xs font-bold text-yellow-900 mb-1" style="font-size: 0.75rem;">${completedCount} / ${totalCount} выполнено</div>`;
+                    
+                    task.subtasks.forEach((subtask, index) => {
+                        const uniqueId = `main-subtask-${task.id}-${index}`;
+                        subtasksEl += `
+                            <div class="main-subtask-item">
+                                <input 
+                                    type="checkbox" 
+                                    id="${uniqueId}" 
+                                    ${subtask.done ? 'checked' : ''} 
+                                    onchange="event.stopPropagation(); window.toggleSubtaskOnMainList('${task.id}', ${index}, this.checked)"
+                                >
+                                <label for="${uniqueId}" onclick="event.stopPropagation()">${subtask.text}</label>
+                            </div>
+                        `;
+                    });
+                    
+                    subtasksEl += '</div>';
+                }
+                // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
                 el.className = `task-item p-3 bg-white bg-opacity-80 rounded-lg shadow-sm priority-${task.priority} status-${task.status} mb-2`;
                 el.innerHTML = `
                     <div class="flex justify-between items-start gap-2">
@@ -1416,8 +1485,9 @@
                                 ${statusIndicator}
                                 ${assigneeTag}
                             </div>
-                            ${descriptionEl} <!-- Описание добавлено сюда -->
-                            ${taskDate ? `<div class="text-xs text-yellow-900 font-bold mt-1">📅 ${dateString}</div>` : ''}
+                            ${descriptionEl}
+                            ${subtasksEl} <!-- Подзадачи добавлены сюда -->
+                            ${taskDate ? `<div class="text-xs text-yellow-900 font-bold mt-2">📅 ${dateString}</div>` : ''} <!-- Добавлен mt-2 для отступа -->
                         </div>
                         <div class="flex gap-2 flex-shrink-0">
                             ${buttons}
@@ -1427,7 +1497,6 @@
                 return el;
             }
 
-            // (без изменений)
             window.startTask = async (id) => {
                 if (!currentUserId) return;
                 const taskRef = doc(db, `/artifacts/${appId}/public/data/tasks`, id);
@@ -1435,7 +1504,6 @@
                     await updateDoc(taskRef, { status: 'inProgress' });
                 } catch (e) { console.error("Ошибка старта задачи:", e); }
             };
-            // (без изменений)
             window.completeTask = async (id) => {
                 if (!currentUserId) return;
                 const taskRef = doc(db, `/artifacts/${appId}/public/data/tasks`, id);
@@ -1445,7 +1513,6 @@
                     confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
                 } catch (e) { console.error("Ошибка завершения задачи:", e); }
             };
-            // (без изменений)
             window.reactivateTask = async (id) => {
                 if (!currentUserId) return;
                 const taskRef = doc(db, `/artifacts/${appId}/public/data/tasks`, id);
@@ -1453,7 +1520,6 @@
                     await updateDoc(taskRef, { status: 'pending' });
                 } catch (e) { console.error("Ошибка активации задачи:", e); }
             };
-            // (без изменений)
             window.deleteTask = async (id) => {
                 if (!currentUserId) return;
                 const taskRef = doc(db, `/artifacts/${appId}/public/data/tasks`, id);
@@ -1463,7 +1529,7 @@
             };
 
             
-            // --- ФУНКЦИЯ: Показать модальное окно дня (без изменений) ---
+            // --- ФУНКЦИЯ: Показать модальное окно дня ---
             function showDayViewModal(date) {
                 currentViewingDate = date; 
 
@@ -1535,59 +1601,28 @@
 
 
             // --- ТАЙМЕР ---
-            // (ИЗМЕНЕН: Добавлена валидация для type="text")
             let timerTime = 25 * 60; let defaultTime = 25; let timerInterval = null; let isRunning = false;
-            const timerDisplay = document.getElementById('timerDisplay'); 
-            const timerInput = document.getElementById('timerInput');
-            const timerStatus = document.getElementById('timerStatus'); 
-            const startTimerBtn = document.getElementById('startTimerBtn');
-            
+            const timerDisplay = document.getElementById('timerDisplay'); const timerInput = document.getElementById('timerInput');
+            const timerStatus = document.getElementById('timerStatus'); const startTimerBtn = document.getElementById('startTimerBtn');
             const updateDisplay = () => {
                 const m = Math.floor(timerTime / 60).toString().padStart(2, '0');
                 const s = (timerTime % 60).toString().padStart(2, '0');
                 timerDisplay.textContent = `${m}:${s}`;
             };
-
-            // ИЗМЕНЕНИЕ iOS: Валидация для type="text"
             document.getElementById('timerSettingsBtn').addEventListener('click', () => {
                 if (isRunning) return; 
                 const isEditing = !timerInput.classList.contains('hidden');
                 if (isEditing) {
-                    // Валидация для type="text"
-                    let newVal = parseInt(timerInput.value, 10);
-                    if (!isNaN(newVal) && newVal > 0 && newVal <= 180) { 
-                        defaultTime = newVal; 
-                    } else {
-                        // Если ввели ерунду, просто сбрасываем на старое значение
-                        timerInput.value = defaultTime;
-                    }
-                    timerTime = defaultTime * 60; 
-                    updateDisplay(); 
-                    
-                    timerInput.classList.add('hidden'); 
-                    timerDisplay.classList.remove('opacity-0');
+                    let newVal = parseInt(timerInput.value);
+                    if (newVal > 0 && newVal <= 180) { defaultTime = newVal; timerTime = defaultTime * 60; updateDisplay(); }
+                    timerInput.classList.add('hidden'); timerDisplay.classList.remove('opacity-0');
                 } else {
-                    timerInput.value = defaultTime; 
-                    timerInput.classList.remove('hidden');
-                    timerInput.focus(); 
-                    timerDisplay.classList.add('opacity-0');
+                    timerInput.value = defaultTime; timerInput.classList.remove('hidden');
+                    timerInput.focus(); timerDisplay.classList.add('opacity-0');
                 }
             });
-            
-            // ИЗМЕНЕНИЕ iOS: Дополнительная фильтрация ввода
-            timerInput.addEventListener('input', (e) => {
-                // Удаляем всё, что не является цифрой
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
-
-            timerInput.addEventListener('blur', () => { 
-                if(!timerInput.classList.contains('hidden')) {
-                    document.getElementById('timerSettingsBtn').click(); 
-                }
-            });
+            timerInput.addEventListener('blur', () => { if(!timerInput.classList.contains('hidden')) document.getElementById('timerSettingsBtn').click(); });
             timerInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') timerInput.blur(); });
-            
-            // (Логика Start/Reset без изменений)
             startTimerBtn.addEventListener('click', () => {
                 if (!audioInit) initAudio();
                 if (isRunning) {
@@ -1602,7 +1637,8 @@
                             if(audioInit) window.alarmSynth.triggerAttackRelease("C5", "1s");
                             timerStatus.textContent = "Готово! Отдохните."; startTimerBtn.textContent = "Варить!";
                             timerTime = defaultTime * 60;
-                            updateDisplay(); 
+                            updateDisplay();
+
                             if (audioInit && brownNoise) {
                                 brownNoise.volume.rampTo(-Infinity, 1);
                                 const noiseBtn = document.getElementById('noiseToggleBtn');
@@ -1629,7 +1665,7 @@
                 }
             });
             
-            // --- ФУНКЦИЯ: Очистка модалки создания (без изменений) ---
+            // --- ФУНКЦИЯ: Очистка модалки создания ---
             function resetAddTaskModal() {
                 document.getElementById('taskInput').value = '';
                 document.getElementById('taskDescriptionInput').value = '';
@@ -1641,7 +1677,7 @@
                 document.getElementById('taskAssignee').value = 'everyone';
             }
 
-            // --- ДОБАВЛЕНИЕ ЗАДАЧИ (без изменений) ---
+            // --- ДОБАВЛЕНИЕ ЗАДАЧИ ---
             const datePicker = flatpickr("#taskDueDate", { locale: "ru", enableTime: true, time_24hr: true, dateFormat: "Y-m-d H:i" });
             
             openTaskModalBtn.addEventListener('click', () => { 
@@ -1714,7 +1750,7 @@
                 }
             });
             
-            // --- СЛУШАТЕЛИ (Подзадачи при создании) (без изменений) ---
+            // --- СЛУШАТЕЛИ (Подзадачи при создании) ---
             function addNewSubtaskLocal() {
                 const text = newTaskNewSubtask.value.trim();
                 if (!text) return;
@@ -1754,7 +1790,7 @@
                 }
             });
 
-            // --- ОБРАБОТЧИКИ ФИЛЬТРОВ (Задач) (без изменений) ---
+            // --- ОБРАБОТЧИКИ ФИЛЬТРОВ (Задач) ---
             filterActiveBtn.addEventListener('click', (e) => {
                 currentFilter = 'active';
                 updateFilterButtons(e.target);
@@ -1796,7 +1832,7 @@
                 if(audioInit) window.hatSynth.triggerAttackRelease("G4", "8n");
             });
 
-            // --- СЛУШАТЕЛИ (Настройки) (без изменений) ---
+            // --- СЛУШАТЕЛИ (Настройки) ---
             openSettingsBtn.addEventListener('click', () => {
                 if (currentUserNickname) {
                     nicknameInput.value = currentUserNickname;
@@ -1817,14 +1853,21 @@
                 saveNicknameBtn.textContent = "Сохранение...";
 
                 try {
+                    // Обновляем в Firestore
                     const userDocRef = doc(db, `/artifacts/${appId}/public/data/users`, currentUserId);
                     await updateDoc(userDocRef, { nickname: newNickname });
 
+                    // Обновляем в Realtime Database (для presence)
                     const userStatusRef = ref(rtdb, `/artifacts/${appId}/presence/${currentUserId}/name`);
                     await set(userStatusRef, newNickname);
                     
                     currentUserNickname = newNickname;
                     currentUserDisplayEl.textContent = newNickname;
+
+                    // Обновляем никнейм в KNOWN_USER_MAP, если он там есть
+                    if (KNOWN_USER_MAP[currentUserId]) {
+                        KNOWN_USER_MAP[currentUserId] = newNickname;
+                    }
 
                     settingsModal.style.display = 'none';
                 } catch (e) {
@@ -1835,7 +1878,7 @@
                 }
             });
 
-            // --- СЛУШАТЕЛИ И ФУНКЦИИ (Детали Задачи) (без изменений) ---
+            // --- СЛУШАТЕЛИ И ФУНКЦИИ (Детали Задачи) ---
             
             detailDatePicker = flatpickr("#taskDetailDateEdit", { locale: "ru", enableTime: true, time_24hr: true, dateFormat: "Y-m-d H:i" });
             
@@ -2115,42 +2158,6 @@
             
             // --- ФУНКЦИИ (Стикеры) ---
             
-            // ИЗМЕНЕНИЕ iOS: Новые функции-хелперы для перетаскивания
-            function onDragStart(clientX, clientY, el) {
-                isStickerDragging = true;
-                currentDraggingSticker = el;
-                
-                stickerOffsetX = clientX - el.getBoundingClientRect().left;
-                stickerOffsetY = clientY - el.getBoundingClientRect().top;
-                
-                el.style.cursor = 'grabbing';
-                el.style.zIndex = 4001; 
-            }
-
-            function onDragMove(clientX, clientY) {
-                if (!isStickerDragging || !currentDraggingSticker) return;
-                
-                let newX = clientX - stickerOffsetX;
-                let newY = clientY - stickerOffsetY;
-
-                const elRect = currentDraggingSticker.getBoundingClientRect();
-                newX = Math.max(0, Math.min(newX, window.innerWidth - elRect.width));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - elRect.height));
-
-                currentDraggingSticker.style.left = `${newX}px`;
-                currentDraggingSticker.style.top = `${newY}px`;
-            }
-            
-            function onDragEnd() {
-                if (isStickerDragging && currentDraggingSticker) {
-                    currentDraggingSticker.style.cursor = 'grab';
-                    currentDraggingSticker.style.zIndex = ''; 
-                }
-                isStickerDragging = false;
-                currentDraggingSticker = null;
-            }
-            // --- Конец новых функций ---
-            
             function addStickerToDOM(sticker) {
                 const timerRect = {
                     x: window.innerWidth - 220 - 20, 
@@ -2197,19 +2204,26 @@
                     <span class="sticker-author">${sticker.nickname}</span>
                 `;
 
-                // ИЗМЕНЕНИЕ iOS: Используем onDragStart для Mouse и Touch
-                el.addEventListener('mousedown', (e) => {
+                // --- ИЗМЕНЕНИЕ: Поддержка Touch-событий для iOS ---
+                const onDragStart = (e) => {
                     if (e.target.classList.contains('sticker-delete-btn')) return;
-                    e.preventDefault(); // Важно для mousedown
-                    onDragStart(e.clientX, e.clientY, el);
-                });
-                
-                el.addEventListener('touchstart', (e) => {
-                    if (e.target.classList.contains('sticker-delete-btn')) return;
-                    // e.preventDefault() НЕ нужен для touchstart с {passive: true}
-                    const touch = e.touches[0];
-                    onDragStart(touch.clientX, touch.clientY, el);
-                }, { passive: true }); // {passive: true} для лучшей производительности
+                    
+                    e.preventDefault(); // Предотвратить прокрутку
+                    isStickerDragging = true;
+                    currentDraggingSticker = el;
+                    
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    
+                    stickerOffsetX = clientX - el.getBoundingClientRect().left;
+                    stickerOffsetY = clientY - el.getBoundingClientRect().top;
+                    
+                    el.style.cursor = 'grabbing';
+                    el.style.zIndex = 4001; 
+                };
+
+                el.addEventListener('mousedown', onDragStart);
+                el.addEventListener('touchstart', onDragStart, { passive: false }); // Добавлено passive: false
 
                 stickerBackdrop.appendChild(el);
             }
@@ -2282,24 +2296,39 @@
             closeStickerModalBtn.addEventListener('click', () => stickerModal.style.display = 'none');
             stickerModal.addEventListener('click', (e) => { if(e.target === stickerModal) stickerModal.style.display = 'none'; });
             
-            // ИЗМЕНЕНИЕ iOS: Глобальные слушатели для перетаскивания (Mouse + Touch)
-            document.addEventListener('mousemove', (e) => {
-                if (!isStickerDragging) return;
-                e.preventDefault(); // Предотвращаем выделение текста
-                onDragMove(e.clientX, e.clientY);
-            });
-            document.addEventListener('mouseup', onDragEnd);
-            
-            document.addEventListener('touchmove', (e) => {
-                if (!isStickerDragging) return;
-                e.preventDefault(); // Предотвращаем скролл страницы
-                const touch = e.touches[0];
-                onDragMove(touch.clientX, touch.clientY);
-            }, { passive: false }); // passive: false, так как мы вызываем preventDefault
-            
-            document.addEventListener('touchend', onDragEnd);
-            document.addEventListener('touchcancel', onDragEnd); // На случай прерывания
+            // --- ИЗМЕНЕНИЕ: Поддержка Touch-событий для iOS ---
+            const onDragMove = (e) => {
+                if (!isStickerDragging || !currentDraggingSticker) return;
+                e.preventDefault(); 
+                
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
 
+                let newX = clientX - stickerOffsetX;
+                let newY = clientY - stickerOffsetY;
+
+                const elRect = currentDraggingSticker.getBoundingClientRect();
+                newX = Math.max(0, Math.min(newX, window.innerWidth - elRect.width));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - elRect.height));
+
+                currentDraggingSticker.style.left = `${newX}px`;
+                currentDraggingSticker.style.top = `${newY}px`;
+            };
+
+            const onDragEnd = () => {
+                if (isStickerDragging && currentDraggingSticker) {
+                    currentDraggingSticker.style.cursor = 'grab';
+                    currentDraggingSticker.style.zIndex = ''; 
+                }
+                isStickerDragging = false;
+                currentDraggingSticker = null;
+            };
+
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('touchmove', onDragMove, { passive: false }); // Добавлено passive: false
+
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('touchend', onDragEnd);
         });
     </script>
 </body>
