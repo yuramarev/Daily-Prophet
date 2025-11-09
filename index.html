@@ -108,12 +108,12 @@
         /* ИЗМЕНЕНИЕ: Таймер теперь использует left/top и имеет cursor: grab */
         #stickyTimer { 
             position: fixed; 
-            top: 1rem; 
-            /* Изначально позиционируем справа, используя left и calc. Ширина 220px + отступ 1rem */
-            left: calc(100% - 220px - 1rem); 
+            top: 1rem; /* ИЗМЕНЕНО: Возвращено на 1rem */
+            left: calc(100% - 220px - 1rem); /* ИЗМЕНЕНО: Возвращено вправо */
+            /* transform: translateY(-50%); */ /* УДАЛЕНО: Больше не нужно */
             z-index: 1000; 
             width: 220px; 
-            transition: transform 0.3s ease;
+            /* transition: transform 0.3s ease; */ /* УДАЛЕНО: Мешает JS-перетаскиванию */
             cursor: grab; /* Курсор для перетаскивания */
             /* ИЗМЕНЕНИЕ: Предотвращение выделения текста на iOS */
             -webkit-user-select: none;
@@ -127,6 +127,66 @@
         .btn-timer-small:hover { background-color: #6d413c; }
         .btn-icon-small { background: none; border: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; font-size: 1.1rem; }
         .btn-icon-small:hover, .btn-icon-small.active { opacity: 1; }
+
+        /* NEW STYLES FOR MINIMIZE */
+        /* Стили для новой кнопки свертывания */
+        .btn-timer-minimize {
+            position: absolute;
+            top: 50%; /* ИЗМЕНЕНО: Посередине по высоте */
+            transform: translateY(-50%); /* ИЗМЕНЕНО: Добавлено для центрирования */
+            left: 0.5rem; /* 8px */
+            width: 1.5rem; /* 24px */
+            height: 1.5rem; /* 24px */
+            background-color: rgba(74, 44, 42, 0.1);
+            border: 1px solid #c7a265;
+            color: #4a2c2a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001; /* Выше остального контента таймера */
+            transition: all 0.2s;
+        }
+        .btn-timer-minimize:hover { 
+            background-color: rgba(74, 44, 42, 0.2); 
+            transform: translateY(-50%) scale(1.1); /* ИЗМЕНЕНО: Объединены transform */
+        }
+        .btn-timer-minimize svg { 
+            width: 0.9rem; /* 14.4px */
+            height: 0.9rem; /* 14.4px */
+            stroke-width: 2.5;
+        }
+        /* Показываем иконку "свернуть" и прячем "развернуть" по умолчанию */
+        .btn-timer-minimize .icon-maximize { display: none; }
+        .btn-timer-minimize .icon-minimize { display: block; }
+        
+        /* Стили для свернутого состояния */
+        #stickyTimer.timer-minimized {
+            width: 48px !important;  /* Маленький квадратик */
+            height: 48px; /* Маленький квадратик */
+            overflow: hidden; /* На всякий случай */
+        }
+        /* Прячем ВЕСЬ контент, кроме кнопки */
+        #stickyTimer.timer-minimized #timerTitle,
+        #stickyTimer.timer-minimized #timerControlsGroup,
+        #stickyTimer.timer-minimized #timerDisplayContainer,
+        #stickyTimer.timer-minimized #timerStatus,
+        #stickyTimer.timer-minimized .flex.gap-2.justify-center
+        {
+            display: none;
+        }
+        /* Переключаем иконки в свернутом состоянии */
+        #stickyTimer.timer-minimized .btn-timer-minimize .icon-minimize { display: none; }
+        #stickyTimer.timer-minimized .btn-timer-minimize .icon-maximize { display: block; }
+        
+        /* Центрируем кнопку в свернутом состоянии */
+        #stickyTimer.timer-minimized .btn-timer-minimize {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Этот стиль перезапишет позиционирование, и это ПРАВИЛЬНО */
+        }
+        /* --- КОНЕЦ НОВЫХ СТИЛЕЙ --- */
 
         /* --- КАТЕГОРИИ --- */
         .category-pill { display: inline-block; cursor: pointer; font-size: 0.85rem; font-weight: bold; padding: 0.25rem 0.75rem; border-radius: 9999px; color: white; border: 2px solid transparent; transition: all 0.2s; opacity: 0.7; }
@@ -455,10 +515,23 @@
         <!-- 
             Таймер "Зелье Фокуса"
         -->
-        <div id="stickyTimer" class="magic-parchment p-3 shadow-xl">
+        <div id="stickyTimer" class="magic-parchment p-3 shadow-xl relative"> <!-- Добавлен 'relative' -->
+            <!-- НОВАЯ КНОПКА СВЕРТЫВАНИЯ -->
+            <button id="timerMinimizeBtn" class="btn-timer-minimize" title="Свернуть">
+                <!-- Иконка "Свернуть" (минус) -->
+                <svg class="icon-minimize" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                </svg>
+                <!-- Иконка "Развернуть" (квадрат) -->
+                <svg class="icon-maximize" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v16.5h16.5V3.75H3.75z" />
+                </svg>
+            </button>
+
             <div class="flex justify-between items-center mb-2">
-                <span class="text-xs font-bold text-yellow-900 uppercase tracking-widest">Зелье Фокуса</span>
-                <div class="flex gap-2">
+                <span id="timerTitle" class="text-xs font-bold text-yellow-900 uppercase tracking-widest">Зелье Фокуса</span>
+                <div class="flex gap-2" id="timerControlsGroup">
+                    <!-- Кнопка свертывания УДАЛЕНА отсюда -->
                     <button id="timerSettingsBtn" class="btn-icon-small" title="Настроить время">⚙️</button>
                     <button id="noiseToggleBtn" class="btn-icon-small" title="Шум Выручай-комнаты">🎧</button>
                 </div>
@@ -878,8 +951,9 @@
             const filterCompletedBtn = document.getElementById('filterCompleted');
             const hatSortBtn = document.getElementById('hatSortBtn');
             
-            // ИЗМЕНЕНИЕ: Переменные для перетаскивания таймера
+            // ИЗМЕНЕНИЕ: Переменные для перетаскивания таймера и СВЕРТЫВАНИЯ
             const stickyTimerEl = document.getElementById('stickyTimer');
+            const timerMinimizeBtn = document.getElementById('timerMinimizeBtn'); // НОВЫЙ ЭЛЕМЕНТ
             let isStickerDragging = false;
             let currentDraggingSticker = null;
             let stickerOffsetX = 0;
@@ -1890,6 +1964,19 @@
                 if(audioInit) window.hatSynth.triggerAttackRelease("G4", "8n");
             });
 
+            // --- СЛУШАТЕЛЬ СВЕРТЫВАНИЯ ТАЙМЕРА ---
+            timerMinimizeBtn.addEventListener('click', () => {
+                const isMinimized = stickyTimerEl.classList.toggle('timer-minimized');
+                
+                // Обновляем title (подсказку)
+                if (isMinimized) {
+                    timerMinimizeBtn.title = 'Развернуть';
+                } else {
+                    timerMinimizeBtn.title = 'Свернуть';
+                }
+                // CSS сам позаботится об иконках
+            });
+
             // --- СЛУШАТЕЛИ (Настройки) ---
             openSettingsBtn.addEventListener('click', () => {
                 if (currentUserNickname) {
@@ -2368,8 +2455,16 @@
                 const clientX = e.clientX || e.touches[0].clientX;
                 const clientY = e.clientY || e.touches[0].clientY;
                 
-                timerOffsetX = clientX - stickyTimerEl.getBoundingClientRect().left;
-                timerOffsetY = clientY - stickyTimerEl.getBoundingClientRect().top;
+                // ИЗМЕНЕНО: Логика для поддержки transform
+                const rect = currentDraggingTimer.getBoundingClientRect();
+                timerOffsetX = clientX - rect.left;
+                timerOffsetY = clientY - rect.top;
+                
+                // Устанавливаем inline-стили, чтобы "отвязать" от CSS-transform
+                currentDraggingTimer.style.transform = 'none';
+                currentDraggingTimer.style.top = `${rect.top}px`;
+                currentDraggingTimer.style.left = `${rect.left}px`;
+                currentDraggingTimer.style.right = 'auto'; 
                 
                 stickyTimerEl.style.cursor = 'grabbing';
                 stickyTimerEl.style.zIndex = 5000; // Выше стикеров
