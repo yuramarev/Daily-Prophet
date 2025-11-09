@@ -1,7 +1,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ИЗМЕНЕНИЕ: Улучшенный viewport для iOS, предотвращает масштабирование -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- ИЗМЕНЕНИЕ: Мета-теги для iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -91,6 +92,8 @@
             font-family: 'Merriweather', serif; background-color: #1a1a2e;
             background-image: url('https://www.transparenttextures.com/patterns/dark-denim.png');
             overflow-x: hidden;
+            /* ИЗМЕНЕНИЕ: Предотвращение "отскока" на iOS */
+            overscroll-behavior: none;
         }
         .magic-parchment {
             background-color: rgba(250, 245, 230, 0.95); border: 4px solid #4a2c2a;
@@ -102,7 +105,23 @@
         }
 
         /* --- СТИЛИ ТАЙМЕРА --- */
-        #stickyTimer { position: fixed; top: 1rem; right: 1rem; z-index: 1000; width: 220px; transition: transform 0.3s ease; }
+        /* ИЗМЕНЕНИЕ: Таймер теперь использует left/top и имеет cursor: grab */
+        #stickyTimer { 
+            position: fixed; 
+            top: 1rem; 
+            /* Изначально позиционируем справа, используя left и calc. Ширина 220px + отступ 1rem */
+            left: calc(100% - 220px - 1rem); 
+            z-index: 1000; 
+            width: 220px; 
+            transition: transform 0.3s ease;
+            cursor: grab; /* Курсор для перетаскивания */
+            /* ИЗМЕНЕНИЕ: Предотвращение выделения текста на iOS */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        #stickyTimer:active {
+            cursor: grabbing;
+        }
         .timer-display-compact { font-family: 'Cinzel Decorative', serif; font-size: 1.8rem; font-weight: 700; color: #4a2c2a; text-align: center; line-height: 1; cursor: pointer; }
         .btn-timer-small { font-size: 0.8rem; padding: 4px 8px; background-color: #4a2c2a; color: #fdf5e6; border: 1px solid #c7a265; border-radius: 4px; cursor: pointer; }
         .btn-timer-small:hover { background-color: #6d413c; }
@@ -154,6 +173,8 @@
         .modal-content { 
             width: 100%; max-width: 42rem; max-height: 90vh; overflow-y: auto; 
             scrollbar-width: thin; scrollbar-color: #4a2c2a rgba(250, 245, 230, 0.95);
+            /* ИЗМЕНЕНИЕ: Плавная прокрутка на iOS */
+            -webkit-overflow-scrolling: touch;
         }
         .btn-magic { font-family: 'Merriweather', serif; font-weight: 700; background-color: #4a2c2a; color: #fdf5e6; border: 2px solid #c7a265; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: all 0.2s ease; cursor: pointer; }
         .btn-magic:hover { background-color: #6d413c; color: #fff; transform: translateY(-2px); }
@@ -259,6 +280,8 @@
         #stickerBackdrop {
             position: fixed; inset: 0; width: 100vw; height: 100vh;
             z-index: 4000; pointer-events: none;
+            /* ИЗМЕНЕНИЕ: Предотвращение "отскока" на iOS */
+            overscroll-behavior: none;
         }
         @keyframes popIn {
             from { opacity: 0; transform: scale(0.8) rotate(-10deg); }
@@ -271,7 +294,15 @@
             pointer-events: auto; cursor: grab;
             background-image: url('https://placehold.co/200x200/fef08a/fef08a.png');
             background-size: contain; background-repeat: no-repeat;
-            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3));
+            /* ИЗМЕНЕНИЕ: Замена filter на box-shadow для производительности на iOS */
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+            /* filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3)); -- Старый стиль */
+            /* ИЗМЕНЕНИЕ: Предотвращение выделения текста на iOS */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .sticker-note-absolute:active {
+            cursor: grabbing;
         }
         .sticker-delete-btn {
             position: absolute; top: 4px; right: 4px;
@@ -444,10 +475,18 @@
             </div>
         </div>
         
-        <header class="text-center mb-6 relative pt-4">
+        <!-- 
+            ИЗМЕНЕНИЕ: Заголовок теперь flex-col на мобильных
+            и md:relative для позиционирования кнопок на десктопе 
+        -->
+        <header class="text-center mb-6 pt-4 flex flex-col items-center md:relative">
             <h1 class="magic-title text-4xl md:text-5xl font-bold text-yellow-100">Ежедневный Пророк</h1>
             
-            <div id="userControls" class="absolute top-0 right-0 p-2 flex gap-2">
+            <!-- 
+                ИЗМЕНЕНИЕ: Кнопки теперь в потоке на мобильных (mt-4)
+                и md:absolute на десктопе
+            -->
+            <div id="userControls" class="mt-4 md:mt-0 md:absolute md:top-0 md:right-0 p-2 flex gap-2">
                  <button id="hatSortBtn" class="btn-header-icon" title="Случайная задача">🎩</button>
                  <button id="openSettingsBtn" class="btn-header-icon" title="Настройки">⚙️</button>
                  <button id="logoutBtn" class="btn-header-icon" title="Выйти">🚪</button>
@@ -839,10 +878,18 @@
             const filterCompletedBtn = document.getElementById('filterCompleted');
             const hatSortBtn = document.getElementById('hatSortBtn');
             
+            // ИЗМЕНЕНИЕ: Переменные для перетаскивания таймера
+            const stickyTimerEl = document.getElementById('stickyTimer');
             let isStickerDragging = false;
             let currentDraggingSticker = null;
             let stickerOffsetX = 0;
             let stickerOffsetY = 0;
+            
+            let isTimerDragging = false;
+            let currentDraggingTimer = null;
+            let timerOffsetX = 0;
+            let timerOffsetY = 0;
+            // КОНЕЦ ИЗМЕНЕНИЯ
 
             const iconPlay = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M17.4,10.4L5.8,17.6C5.5,17.8,5.1,17.7,4.9,17.4C4.8,17.2,4.8,16.9,4.9,16.7L8,10L4.9,3.3C4.8,3.1,4.8,2.8,4.9,2.6C5.2,2.3,5.5,2.2,5.8,2.4L17.4,9.6C17.7,9.8,17.8,10.2,17.6,10.4C17.6,10.4,17.5,10.4,17.4,10.4z"/></svg>`;
             const iconCheck = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M18.5,3.1l-9.8,9.8L4.3,8.4C4,8.1,3.5,8.1,3.2,8.4c-0.3,0.3-0.3,0.8,0,1.1l5.1,5.1c0.1,0.1,0.3,0.2,0.5,0.2s0.4-0.1,0.5-0.2l10.6-10.6c0.3-0.3,0.3-0.8,0-1.1C19.3,2.8,18.8,2.8,18.5,3.1z"/></svg>`;
@@ -1559,7 +1606,9 @@
                 } else {
                     tasksForDay.forEach(task => {
                         const el = document.createElement('div');
-                        el.className = `p-3 rounded-lg flex items-center gap-3 status-${task.status} task-item`;
+                        // ❗️❗️❗️ ИЗМЕНЕНИЕ ЗДЕСЬ ❗️❗️❗️
+                        // Было 'items-center', стало 'items-start' для ровного выравнивания на iOS
+                        el.className = `p-3 rounded-lg flex items-start gap-3 status-${task.status} task-item`;
                         const tagColor = catColors[task.category] || '#666';
                         
                         let assigneeTag = '';
@@ -1571,7 +1620,7 @@
                             <div class="flex-shrink-0 w-20 text-center font-bold text-yellow-900 bg-yellow-100 p-2 rounded">
                                 ${task.date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}
                             </div>
-                            <div class="flex-grow">
+                            <div class="flex-grow min-w-0"> <!-- min-w-0 для фикса переноса -->
                                 ${assigneeTag}
                                 <span class="task-tag" style="background-color: ${tagColor}">${catNames[task.category]}</span>
                                 <span class="font-medium cursor-pointer hover:underline" onclick="window.showTaskDetails('${task.id}')">${task.text}</span>
@@ -2305,23 +2354,61 @@
             closeStickerModalBtn.addEventListener('click', () => stickerModal.style.display = 'none');
             stickerModal.addEventListener('click', (e) => { if(e.target === stickerModal) stickerModal.style.display = 'none'; });
             
-            // --- ИЗМЕНЕНИЕ: Поддержка Touch-событий для iOS ---
-            const onDragMove = (e) => {
-                if (!isStickerDragging || !currentDraggingSticker) return;
-                e.preventDefault(); 
+            // --- ИЗМЕНЕНИЕ: Логика перетаскивания таймера ---
+            const onTimerDragStart = (e) => {
+                // Запретить перетаскивание, если клик был по кнопке или инпуту
+                if (e.target.closest('button') || e.target.closest('input')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                isTimerDragging = true;
+                currentDraggingTimer = stickyTimerEl;
                 
                 const clientX = e.clientX || e.touches[0].clientX;
                 const clientY = e.clientY || e.touches[0].clientY;
+                
+                timerOffsetX = clientX - stickyTimerEl.getBoundingClientRect().left;
+                timerOffsetY = clientY - stickyTimerEl.getBoundingClientRect().top;
+                
+                stickyTimerEl.style.cursor = 'grabbing';
+                stickyTimerEl.style.zIndex = 5000; // Выше стикеров
+            };
 
-                let newX = clientX - stickerOffsetX;
-                let newY = clientY - stickerOffsetY;
+            stickyTimerEl.addEventListener('mousedown', onTimerDragStart);
+            stickyTimerEl.addEventListener('touchstart', onTimerDragStart, { passive: false });
 
-                const elRect = currentDraggingSticker.getBoundingClientRect();
-                newX = Math.max(0, Math.min(newX, window.innerWidth - elRect.width));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - elRect.height));
+            // --- ИЗМЕНЕНИЕ: Глобальные обработчики для Стикеров и Таймера ---
+            const onDragMove = (e) => {
+                // Получаем clientX/Y. e.touches может быть пустым на touchend
+                const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
 
-                currentDraggingSticker.style.left = `${newX}px`;
-                currentDraggingSticker.style.top = `${newY}px`;
+                if (!clientX && !clientY && (isStickerDragging || isTimerDragging)) return;
+
+                if (isStickerDragging && currentDraggingSticker) {
+                    e.preventDefault();
+                    let newX = clientX - stickerOffsetX;
+                    let newY = clientY - stickerOffsetY;
+                    
+                    currentDraggingSticker.style.left = `${newX}px`;
+                    currentDraggingSticker.style.top = `${newY}px`;
+                    
+                } else if (isTimerDragging && currentDraggingTimer) {
+                    e.preventDefault();
+                    let newX = clientX - timerOffsetX;
+                    let newY = clientY - timerOffsetY;
+                    
+                    // Ограничиваем движение таймера рамками экрана
+                    const elRect = currentDraggingTimer.getBoundingClientRect();
+                    newX = Math.max(0, Math.min(newX, window.innerWidth - elRect.width));
+                    newY = Math.max(0, Math.min(newY, window.innerHeight - elRect.height));
+
+                    currentDraggingTimer.style.left = `${newX}px`;
+                    currentDraggingTimer.style.top = `${newY}px`;
+                    // Убираем 'right', чтобы 'left' работал
+                    currentDraggingTimer.style.right = 'auto'; 
+                }
             };
 
             const onDragEnd = () => {
@@ -2331,10 +2418,17 @@
                 }
                 isStickerDragging = false;
                 currentDraggingSticker = null;
+
+                if (isTimerDragging && currentDraggingTimer) {
+                    currentDraggingTimer.style.cursor = 'grab';
+                    currentDraggingTimer.style.zIndex = '1000'; // Возвращаем z-index
+                }
+                isTimerDragging = false;
+                currentDraggingTimer = null;
             };
 
             document.addEventListener('mousemove', onDragMove);
-            document.addEventListener('touchmove', onDragMove, { passive: false }); // Добавлено passive: false
+            document.addEventListener('touchmove', onDragMove, { passive: false });
 
             document.addEventListener('mouseup', onDragEnd);
             document.addEventListener('touchend', onDragEnd);
