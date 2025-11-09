@@ -118,6 +118,7 @@
             /* ИЗМЕНЕНИЕ: Предотвращение выделения текста на iOS */
             -webkit-user-select: none;
             user-select: none;
+            transition: width 0.3s ease, height 0.3s ease, top 0.3s ease, left 0.3s ease; /* Добавлен transition */
         }
         #stickyTimer:active {
             cursor: grabbing;
@@ -166,6 +167,11 @@
             width: 48px !important;  /* Маленький квадратик */
             height: 48px; /* Маленький квадратик */
             overflow: hidden; /* На всякий случай */
+            /* НОВЫЕ СТРОКИ ДЛЯ ПОЗИЦИИ */
+            top: 1rem !important;
+            left: 1rem !important;
+            transform: none !important; /* Сброс transform */
+            right: auto !important; /* Убедиться, что left главнее */
         }
         /* Прячем ВЕСЬ контент, кроме кнопки */
         #stickyTimer.timer-minimized #timerTitle,
@@ -951,9 +957,9 @@
             const filterCompletedBtn = document.getElementById('filterCompleted');
             const hatSortBtn = document.getElementById('hatSortBtn');
             
-            // ИЗМЕНЕНИЕ: Переменные для перетаскивания таймера и СВЕРТЫВАНИЯ
+            // ИЗМЕНЕНИЕ: Переменные для перетаскивания таймера
             const stickyTimerEl = document.getElementById('stickyTimer');
-            const timerMinimizeBtn = document.getElementById('timerMinimizeBtn'); // НОВЫЙ ЭЛЕМЕНТ
+            const timerMinimizeBtn = document.getElementById('timerMinimizeBtn'); // <-- Новая кнопка
             let isStickerDragging = false;
             let currentDraggingSticker = null;
             let stickerOffsetX = 0;
@@ -1680,8 +1686,7 @@
                 } else {
                     tasksForDay.forEach(task => {
                         const el = document.createElement('div');
-                        // ❗️❗️❗️ ИЗМЕНЕНИЕ ЗДЕСЬ ❗️❗️❗️
-                        // Было 'items-center', стало 'items-start' для ровного выравнивания на iOS
+                        // ИЗМЕНЕНИЕ: Убран items-center, добавлен items-start для выравнивания по верху
                         el.className = `p-3 rounded-lg flex items-start gap-3 status-${task.status} task-item`;
                         const tagColor = catColors[task.category] || '#666';
                         
@@ -1690,14 +1695,15 @@
                             assigneeTag = `<span class="assignee-tag !ml-0 !mr-2">${task.assignedTo.nickname}</span>`;
                         }
                         
+                        // ИЗМЕНЕНИЕ: Добавлены классы text-sm md:text-base и w-16 md:w-20
                         el.innerHTML = `
-                            <div class="flex-shrink-0 w-20 text-center font-bold text-yellow-900 bg-yellow-100 p-2 rounded">
+                            <div class="flex-shrink-0 w-16 md:w-20 text-center font-bold text-yellow-900 bg-yellow-100 p-2 rounded text-sm md:text-base">
                                 ${task.date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                             <div class="flex-grow min-w-0"> <!-- min-w-0 для фикса переноса -->
                                 ${assigneeTag}
                                 <span class="task-tag" style="background-color: ${tagColor}">${catNames[task.category]}</span>
-                                <span class="font-medium cursor-pointer hover:underline" onclick="window.showTaskDetails('${task.id}')">${task.text}</span>
+                                <span class="font-medium cursor-pointer hover:underline text-sm md:text-base" onclick="window.showTaskDetails('${task.id}')">${task.text}</span>
                                 ${task.status === 'inProgress' ? '<span class="text-xs font-bold text-purple-700 ml-2">(В процессе...)</span>' : ''}
                                 ${task.status === 'completed' ? '<span class="text-xs font-bold text-green-700 ml-2">(Готово)</span>' : ''}
                             </div>
@@ -1962,19 +1968,6 @@
                 // ИСПРАВЛЕНИЕ: Возвращаем alert с выбором задачи
                 alert(`🎩 Шляпа выбрала: "${randomTask.text}"!`);
                 if(audioInit) window.hatSynth.triggerAttackRelease("G4", "8n");
-            });
-
-            // --- СЛУШАТЕЛЬ СВЕРТЫВАНИЯ ТАЙМЕРА ---
-            timerMinimizeBtn.addEventListener('click', () => {
-                const isMinimized = stickyTimerEl.classList.toggle('timer-minimized');
-                
-                // Обновляем title (подсказку)
-                if (isMinimized) {
-                    timerMinimizeBtn.title = 'Развернуть';
-                } else {
-                    timerMinimizeBtn.title = 'Свернуть';
-                }
-                // CSS сам позаботится об иконках
             });
 
             // --- СЛУШАТЕЛИ (Настройки) ---
@@ -2345,12 +2338,16 @@
 
                 el.innerHTML = `
                     <button class="sticker-delete-btn" onclick="window.deleteSticker('${sticker.id}')" title="Удалить">&times;</button>
-                    <div class="sticker-text">${sticker.text}</div>
+                    <div class="sticker-text" style="font-size: 0.9rem;">${sticker.text}</div>
                     <span class="sticker-author">${sticker.nickname}</span>
                 `;
 
                 // --- ИЗМЕНЕНИЕ: Поддержка Touch-событий для iOS ---
-                const onDragStart = (e) => {
+                const onStickerDragStart = (e) => {
+                    // Только начинаем перетаскивание, если это НЕ pinch
+                    if (e.touches && e.touches.length > 1) {
+                        return;
+                    }
                     if (e.target.classList.contains('sticker-delete-btn')) return;
                     
                     e.preventDefault(); // Предотвратить прокрутку
@@ -2367,8 +2364,63 @@
                     el.style.zIndex = 4001; 
                 };
 
-                el.addEventListener('mousedown', onDragStart);
-                el.addEventListener('touchstart', onDragStart, { passive: false }); // Добавлено passive: false
+                // --- НОВЫЙ КОД: Логика Pinch-to-Zoom ---
+                let initialPinchDistance = null;
+                let initialWidth = 200;
+                let initialFontSize = 0.9;
+
+                const onPinchStart = (e) => {
+                    if (e.touches.length === 2) {
+                        e.preventDefault(); // Stop page zoom
+                        isStickerDragging = false; // Stop dragging
+                        
+                        initialPinchDistance = Math.hypot(
+                            e.touches[0].pageX - e.touches[1].pageX,
+                            e.touches[0].pageY - e.touches[1].pageY
+                        );
+                        initialWidth = el.offsetWidth;
+                        
+                        const currentFontSizeStr = el.querySelector('.sticker-text').style.fontSize;
+                        initialFontSize = parseFloat(currentFontSizeStr) || 0.9; // Fallback
+                    }
+                };
+
+                const onPinchMove = (e) => {
+                    if (e.touches.length === 2 && initialPinchDistance) {
+                        e.preventDefault();
+                        
+                        const newDistance = Math.hypot(
+                            e.touches[0].pageX - e.touches[1].pageX,
+                            e.touches[0].pageY - e.touches[1].pageY
+                        );
+                        
+                        const scale = newDistance / initialPinchDistance;
+                        
+                        // Ограничиваем размер (мин 100px, макс 500px)
+                        const newWidth = Math.max(100, Math.min(initialWidth * scale, 500)); 
+                        // Ограничиваем шрифт (мин 0.5rem, макс 2.5rem)
+                        const newFontSize = Math.max(0.5, Math.min(initialFontSize * scale, 2.5)); 
+                        
+                        el.style.width = `${newWidth}px`;
+                        el.style.height = `${newWidth}px`; // Сохраняем квадратную форму
+                        el.querySelector('.sticker-text').style.fontSize = `${newFontSize}rem`;
+                    }
+                };
+
+                const onPinchEnd = (e) => {
+                    if (e.touches.length < 2) {
+                        initialPinchDistance = null;
+                    }
+                };
+                // --- КОНЕЦ НОВОГО КОДА ---
+
+                el.addEventListener('mousedown', onStickerDragStart);
+                el.addEventListener('touchstart', onStickerDragStart, { passive: false }); // Добавлено passive: false
+                
+                // Добавляем слушатели для pinch-to-zoom
+                el.addEventListener('touchstart', onPinchStart, { passive: false });
+                el.addEventListener('touchmove', onPinchMove, { passive: false });
+                el.addEventListener('touchend', onPinchEnd);
 
                 stickerBackdrop.appendChild(el);
             }
@@ -2384,6 +2436,7 @@
                 if (stickersUnsubscribe) stickersUnsubscribe();
                 const stickersCol = collection(db, `/artifacts/${appId}/public/data/stickers`);
                 
+                // ИСПРАВЛЕНИЕ: Был 'stickBypassSpelling'
                 stickersUnsubscribe = onSnapshot(stickersCol, (snapshot) => {
                     snapshot.docChanges().forEach((change) => {
                         const docData = change.doc.data();
@@ -2455,7 +2508,7 @@
                 const clientX = e.clientX || e.touches[0].clientX;
                 const clientY = e.clientY || e.touches[0].clientY;
                 
-                // ИЗМЕНЕНО: Логика для поддержки transform
+                // ИЗМЕНЕНО: Логика для поддержки transform (если он есть)
                 const rect = currentDraggingTimer.getBoundingClientRect();
                 timerOffsetX = clientX - rect.left;
                 timerOffsetY = clientY - rect.top;
@@ -2472,6 +2525,19 @@
 
             stickyTimerEl.addEventListener('mousedown', onTimerDragStart);
             stickyTimerEl.addEventListener('touchstart', onTimerDragStart, { passive: false });
+
+            // --- СЛУШАТЕЛЬ СВЕРТЫВАНИЯ ТАЙМЕРА ---
+            timerMinimizeBtn.addEventListener('click', () => {
+                const isMinimized = stickyTimerEl.classList.toggle('timer-minimized');
+                
+                // Обновляем title (подсказку)
+                if (isMinimized) {
+                    timerMinimizeBtn.title = 'Развернуть';
+                } else {
+                    timerMinimizeBtn.title = 'Свернуть';
+                }
+                // CSS сам позаботится об иконках
+            });
 
             // --- ИЗМЕНЕНИЕ: Глобальные обработчики для Стикеров и Таймера ---
             const onDragMove = (e) => {
