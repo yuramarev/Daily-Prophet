@@ -1822,13 +1822,13 @@
                 const activeTasks = allTasks.filter(t => t.status === 'pending' || t.status === 'inProgress');
                 if(activeTasks.length === 0) {
                     console.warn("Шляпе нечего выбирать!");
-                    // TODO: Заменить alert на кастомное модальное окно
-                    // alert("🎩 Сначала добавьте заклинания!");
+                    // ИСПРАВЛЕНИЕ: Возвращаем alert, чтобы пользователь видел сообщение
+                    alert("🎩 Сначала добавьте заклинания!");
                     return;
                 }
                 const randomTask = activeTasks[Math.floor(Math.random() * activeTasks.length)];
-                // TODO: Заменить alert на кастомное модальное окно
-                // alert(`🎩 Шляпа выбрала: "${randomTask.text}"!`);
+                // ИСПРАВЛЕНИЕ: Возвращаем alert с выбором задачи
+                alert(`🎩 Шляпа выбрала: "${randomTask.text}"!`);
                 if(audioInit) window.hatSynth.triggerAttackRelease("G4", "8n");
             });
 
